@@ -259,8 +259,8 @@ WindUI:AddTheme({
 
 -- === 2. Ð¡ÐÐÐÐÐÐ ÐÐÐÐ ===
 local Window = WindUI:CreateWindow({
- Title = "NexorHub|UBG",
- Author = "by Nexor X",
+ Title = "NexorHub (bypassed)|UBG",
+ Author = "bypassed by Krujin_2",
  Folder = "NexorHub",
  Icon = "swords",
  IconSize = 32,
@@ -349,7 +349,7 @@ else
  -- ÐÑÐ»Ð¸ API Ð½ÐµÐ´Ð¾ÑÑÑÐ¿Ð½Ð¾ Ð¸Ð»Ð¸ ÐºÐ¾Ð´ Ð½ÐµÐ²ÐµÑÐ½ÑÐ¹
  HomeTab:Paragraph({
  Title = "NexorHub Discord",
- Desc = "Error.\nLink: discord.gg/" .. InviteCode,
+ Desc = "." .. InviteCode,
  Icon = "alert-circle"
  })
 end
