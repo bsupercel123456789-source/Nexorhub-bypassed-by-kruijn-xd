@@ -1,41 +1,3450 @@
-# Compiled Lua sources
-luac.out
 
-# luarocks build files
-*.src.rock
-*.zip
-*.tar.gz
+--fixes
 
-# Object files
-*.o
-*.os
-*.ko
-*.obj
-*.elf
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 
-# Precompiled Headers
-*.gch
-*.pch
+local function ForceShrink(obj)
+ if obj:IsA("BasePart") then
+ if obj.Size.Magnitude > 0.01 then
+ obj.Size = Vector3.new(0.001, 0.001, 0.001)
+ obj.Transparency = 1
+ obj.CanCollide = false
+ end
+ elseif obj:IsA("SpecialMesh") then
+ obj.Scale = Vector3.new(0, 0, 0)
+ elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+ obj.Enabled = false
+ end
+end
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-*.def
-*.exp
+RunService.Heartbeat:Connect(function()
+ for _, player in ipairs(Players:GetPlayers()) do
+ local char = player.Character
+ if char then
+ 
+ for _, desc in ipairs(char:GetDescendants()) do
+ if desc.Name == "TransformationVFX" then
+ ForceShrink(desc)
+ 
+ for _, child in ipairs(desc:GetDescendants()) do
+ ForceShrink(child)
+ end
+ end
+ end
+ 
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+ local rHand = char:FindFirstChild("RightHand")
+ if rHand then
+ for _, child in ipairs(rHand:GetChildren()) do
+ if child.Name == "VFX" then
+ ForceShrink(child)
+ 
+ for _, subChild in ipairs(child:GetDescendants()) do
+ ForceShrink(subChild)
+ end
+ end
+ end
+ end
+ end
+ end
+end)
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+game.ReplicatedStorage.Characters.Gon.WallCombo.GonIntroHands.Size = Vector3.new(0.001, 0.001, 0.001)
+--fixes end
 
+
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Camera = workspace.CurrentCamera
+
+-- ÐÐ°ÑÑÑÐ¾Ð¹ÐºÐ¸
+local musicId = "rbxassetid://15689458836" 
+local musicVolume = 0.25 
+local playerName = Players.LocalPlayer.Name
+
+local executorName = "Unknown"
+if identifyexecutor then executorName = identifyexecutor() end
+
+local function showExecutorNotification(parentGui, name)
+ local notifyFrame = Instance.new("Frame")
+ notifyFrame.Size = UDim2.new(0, 200, 0, 50)
+ notifyFrame.Position = UDim2.new(1.1, 0, 0.9, 0)
+ notifyFrame.BackgroundColor3 = Color3.fromRGB(15, 20, 15)
+ notifyFrame.BorderSizePixel = 0
+ notifyFrame.Parent = parentGui
+ Instance.new("UICorner", notifyFrame).CornerRadius = UDim.new(0, 10)
+ local stroke = Instance.new("UIStroke", notifyFrame)
+ stroke.Color = Color3.fromRGB(0, 255, 120)
+ stroke.Thickness = 2
+ local label = Instance.new("TextLabel", notifyFrame)
+ label.Size = UDim2.new(1, 0, 1, 0)
+ label.BackgroundTransparency = 1
+ label.Text = "Your injector: " .. name
+ label.TextColor3 = Color3.fromRGB(200, 255, 200)
+ label.TextSize = 14
+ label.Font = Enum.Font.GothamMedium
+ notifyFrame:TweenPosition(UDim2.new(0.98, -200, 0.9, 0), "Out", "Back", 0.5, true)
+ task.delay(3, function()
+ if notifyFrame then
+ notifyFrame:TweenPosition(UDim2.new(1.1, 0, 0.9, 0), "In", "Quad", 0.5, true, function() notifyFrame:Destroy() end)
+ end
+ end)
+end
+
+local function runFullSequence()
+ -- 1. ÐÐÐÐÐÐ¢ÐÐÐÐ Ð­Ð¤Ð¤ÐÐÐ¢ÐÐ
+ local sound = Instance.new("Sound", Lighting)
+ sound.SoundId = musicId
+ sound.Volume = musicVolume
+ sound.Looped = true
+ sound:Play()
+
+ local blur = Instance.new("BlurEffect", Lighting)
+ blur.Size = 0
+ 
+ local screenGui = Instance.new("ScreenGui", Players.LocalPlayer:WaitForChild("PlayerGui"))
+ screenGui.Name = "NexorHubLoading"
+ screenGui.IgnoreGuiInset = true 
+
+ local frame = Instance.new("Frame", screenGui)
+ frame.Size = UDim2.new(0, 420, 0, 200)
+ frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+ frame.AnchorPoint = Vector2.new(0.5, 0.5)
+ frame.BackgroundColor3 = Color3.fromRGB(10, 15, 10)
+ frame.BackgroundTransparency = 1 -- ÐÐ°ÑÐ¸Ð½Ð°ÐµÐ¼ Ñ Ð¿ÑÐ¾Ð·ÑÐ°ÑÐ½Ð¾Ð³Ð¾
+ Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 20)
+ 
+ -- ÐÐÐÐÐ ÐÐ©ÐÐÐ ÐÐ ÐÐ¡ÐÐÐ£Ð® ÐÐÐÐÐÐÐ£
+ local uiStroke = Instance.new("UIStroke", frame)
+ uiStroke.Color = Color3.fromRGB(0, 255, 120)
+ uiStroke.Thickness = 3
+ uiStroke.Transparency = 1
+
+ local textLabel = Instance.new("TextLabel", frame)
+ textLabel.Size = UDim2.new(0.9, 0, 0.4, 0)
+ textLabel.Position = UDim2.new(0.5, 0, 0.4, 0)
+ textLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+ textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ textLabel.Text = ""
+ textLabel.TextSize = 24
+ textLabel.Font = Enum.Font.GothamBold
+ textLabel.BackgroundTransparency = 1
+ textLabel.TextTransparency = 1
+
+ local loadingBarBG = Instance.new("Frame", frame)
+ loadingBarBG.Size = UDim2.new(0.7, 0, 0.04, 0)
+ loadingBarBG.Position = UDim2.new(0.5, 0, 0.75, 0)
+ loadingBarBG.AnchorPoint = Vector2.new(0.5, 0.5)
+ loadingBarBG.BackgroundColor3 = Color3.fromRGB(20, 30, 20)
+ loadingBarBG.BackgroundTransparency = 1
+ Instance.new("UICorner", loadingBarBG).CornerRadius = UDim.new(1, 0)
+
+ local loadingBarFill = Instance.new("Frame", loadingBarBG)
+ loadingBarFill.Size = UDim2.new(0, 0, 1, 0)
+ loadingBarFill.BackgroundColor3 = Color3.fromRGB(0, 255, 120) 
+ Instance.new("UICorner", loadingBarFill).CornerRadius = UDim.new(1, 0)
+
+ -- 2. ÐÐÐÐÐÐÐ ÐÐÐ¯ÐÐÐÐÐÐ (ÐÐÐÐÐÐ¦ÐÐ¯)
+ TweenService:Create(blur, TweenInfo.new(1), {Size = 22}):Play()
+ TweenService:Create(frame, TweenInfo.new(1), {BackgroundTransparency = 0.05}):Play()
+ TweenService:Create(uiStroke, TweenInfo.new(1), {Transparency = 0}):Play()
+ TweenService:Create(loadingBarBG, TweenInfo.new(1), {BackgroundTransparency = 0}):Play()
+ TweenService:Create(textLabel, TweenInfo.new(1), {TextTransparency = 0}):Play()
+ task.wait(1)
+
+ local phases = {
+ {text = "Checking Executor...", wait = 1.2, action = "notify"},
+ {text = "Please Wait...", wait = 1.5},
+ {text = "Loading NexorHub...", wait = 1.2},
+ {text = "Welcome, " .. playerName, wait = 2, isFinal = true}
+ }
+
+ for i, phase in ipairs(phases) do
+ textLabel.Text = phase.text
+ if phase.isFinal then textLabel.TextColor3 = Color3.fromRGB(0, 255, 150) end
+ if phase.action == "notify" then showExecutorNotification(screenGui, executorName) end
+ 
+ TweenService:Create(loadingBarFill, TweenInfo.new(phase.wait, Enum.EasingStyle.Sine), {Size = UDim2.new(i / #phases, 0, 1, 0)}):Play()
+ task.wait(phase.wait)
+ end
+
+ -- 3. ÐÐ¡Ð§ÐÐÐÐÐÐÐÐÐ ÐÐÐÐ Ð£ÐÐÐ
+ local out = TweenInfo.new(0.8, Enum.EasingStyle.Quad)
+ TweenService:Create(blur, out, {Size = 0}):Play()
+ TweenService:Create(frame, out, {BackgroundTransparency = 1}):Play()
+ TweenService:Create(uiStroke, out, {Transparency = 1}):Play()
+ TweenService:Create(textLabel, out, {TextTransparency = 1}):Play()
+ TweenService:Create(loadingBarBG, out, {BackgroundTransparency = 1}):Play()
+ TweenService:Create(loadingBarFill, out, {BackgroundTransparency = 1}):Play()
+ TweenService:Create(sound, out, {Volume = 0}):Play()
+ task.wait(0.8)
+ 
+ blur:Destroy()
+ sound:Destroy()
+ screenGui:Destroy()
+
+ -- 4. ÐÐÐÐÐÐ¦ÐÐ¯ ÐÐÐÐÐÐ Ð
+ local CG = game:GetService("CoreGui")
+ local parent = (pcall(function() return CG.Name end) and CG) or Players.LocalPlayer:WaitForChild("PlayerGui")
+ local cloverGui = Instance.new("ScreenGui", parent)
+ cloverGui.IgnoreGuiInset = true
+
+ local img = Instance.new("ImageLabel", cloverGui)
+ img.Image = "rbxassetid://118734496887081"
+ img.Size = UDim2.new(0, 250, 0, 250)
+ img.Position = UDim2.new(0.5, 0, 1.3, 0)
+ img.AnchorPoint = Vector2.new(0.5, 0.5)
+ img.BackgroundTransparency = 1 
+ img.ZIndex = 100
+
+ local showTween = TweenService:Create(img, TweenInfo.new(0.7, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, 0, 0.5, 0), Rotation = 10})
+ local swingTween = TweenService:Create(img, TweenInfo.new(0.1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 10, true), {Rotation = -10})
+ local hideTween = TweenService:Create(img, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Position = UDim2.new(0.5, 0, -0.4, 0), Rotation = -45, ImageTransparency = 1})
+
+ showTween:Play()
+ showTween.Completed:Wait()
+ swingTween:Play()
+ task.wait(1)
+ hideTween:Play()
+ hideTween.Completed:Wait()
+ 
+ cloverGui:Destroy()
+ 
+ -- === Ð¢ÐÐÐ Ð¡ÐÐ ÐÐÐ¢ Ð¡Ð®ÐÐ ===
+ warn("Start script...")
+end
+
+runFullSequence()
+
+wait(0.01)
+
+
+local WindUI
+
+do
+ local ok, result = pcall(function()
+ return require("./src/Init")
+ end)
+ 
+ if ok then
+ WindUI = result
+ else 
+ WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+ end
+end
+
+
+-- === 1. Ð¡ÐÐÐÐÐÐ Ð¢ÐÐÐ£ Ð¡ ÐÐ ÐÐÐÐÐÐ¢ÐÐ ÐÐ Ð¤ÐÐÐ ===
+WindUI:AddTheme({
+ Name = "NexorDark",
+ 
+ -- ÐÑÐ¸Ð¼ÐµÐ½ÑÐµÐ¼ Ð³ÑÐ°Ð´Ð¸ÐµÐ½Ñ Ð¿ÑÑÐ¼Ð¾ Ðº ÑÐ¾Ð½Ñ (Background)
+ Background = WindUI:Gradient({ 
+ ["0"] = { Color = Color3.fromHex("#001a00"), Transparency = 0 }, -- ÐÑÐµÐ½Ñ ÑÐµÐ¼Ð½ÑÐ¹ Ð·ÐµÐ»ÐµÐ½ÑÐ¹ 
+ ["100"] = { Color = Color3.fromHex("#004d00"), Transparency = 0 }, -- ÐÐ¾ÑÐ²ÐµÑÐ»ÐµÐµ
+ }, { 
+ Rotation = 45, 
+ }),
+
+ Accent = Color3.fromHex("#30FF6A"), -- Ð¯ÑÐºÐ¾-Ð·ÐµÐ»ÐµÐ½ÑÐ¹ Ð°ÐºÑÐµÐ½Ñ
+ Outline = Color3.fromHex("#1c1c20"),
+ Text = Color3.fromHex("#FFFFFF"),
+ Placeholder = Color3.fromHex("#7a7a7a"),
+ Button = Color3.fromHex("#1f1f23"),
+ Icon = Color3.fromHex("#FFFFFF"),
+})
+
+-- === 2. Ð¡ÐÐÐÐÐÐ ÐÐÐÐ ===
+local Window = WindUI:CreateWindow({
+ Title = "NexorHub|UBG",
+ Author = "by Nexor X",
+ Folder = "NexorHub",
+ Icon = "swords",
+ IconSize = 32,
+ NewElements = true,
+ Size = UDim2.fromOffset(800, 700),
+ Theme = "NexorDark", -- ÐÐ°ÑÐ° ÑÐµÐ¼Ð° ÑÐµÐ¿ÐµÑÑ ÑÐ°Ð¼Ð° Ð·Ð½Ð°ÐµÑ Ð¿ÑÐ¾ Ð³ÑÐ°Ð´Ð¸ÐµÐ½Ñ
+ 
+ HideSearchBar = false,
+
+ OpenButton = {
+ Title = "NexorHub",
+ CornerRadius = UDim.new(1, 0),
+ StrokeThickness = 3,
+ Enabled = true,
+ Draggable = true,
+ OnlyMobile = false,
+ Color = ColorSequence.new(Color3.fromHex("#30FF6A"))
+ },
+ Topbar = {
+ Height = 44,
+ ButtonsType = "Default",
+ },
+})
+
+
+
+local HomeTab = Window:Tab({
+ Title = "Home", -- Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð²ÐºÐ»Ð°Ð´ÐºÐ¸
+ Icon = "house", -- Ð¸ÐºÐ¾Ð½ÐºÐ° (Ð¾Ð¿ÑÐ¸Ð¾Ð½Ð°Ð»ÑÐ½Ð¾, ÑÐ¼. ÑÐ¿Ð¸ÑÐ¾Ðº Ð¸ÐºÐ¾Ð½Ð¾Ðº Ð² Ð´Ð¾ÐºÑÐ¼ÐµÐ½ÑÐ°ÑÐ¸Ð¸ WindUI)
+ Color = Color3.fromHex("#4CAF50") -- ÑÐ²ÐµÑ Ð²ÐºÐ»Ð°Ð´ÐºÐ¸ (Ð¾Ð¿ÑÐ¸Ð¾Ð½Ð°Ð»ÑÐ½Ð¾)
+})
+
+
+local HttpService = game:GetService("HttpService")
+
+-- Ð¢Ð²Ð¾Ð¹ ÐºÐ¾Ð´ Ð¸Ð½Ð²Ð°Ð¹ÑÐ° ð
+local InviteCode = "z7HBXRymy8"
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿Ð¾Ð»ÑÑÐµÐ½Ð¸Ñ Ð´Ð°Ð½Ð½ÑÑ Ñ API Discord
+local function GetDiscordData(code)
+ local url = "https://discord.com/api/v10/invites/" .. code .. "?with_counts=true"
+ local success, response = pcall(function()
+ return game:HttpGet(url)
+ end)
+ 
+ if success then
+ return HttpService:JSONDecode(response)
+ end
+ return nil
+end
+
+local data = GetDiscordData(InviteCode)
+
+if data and data.guild then
+ local g = data.guild
+ 
+ -- Ð¡Ð¾Ð±Ð¸ÑÐ°ÐµÐ¼ Ð¾Ð½Ð»Ð°Ð¹Ð½ Ð¸ Ð¾Ð±ÑÐµÐµ ÐºÐ¾Ð»-Ð²Ð¾ ÑÑÐ°ÑÑÐ½Ð¸ÐºÐ¾Ð²
+ local totalMembers = data.approximate_member_count or "???"
+ local onlineMembers = data.approximate_presence_count or "???"
+ 
+ -- Ð¡ÑÑÐ»ÐºÐ¸ Ð½Ð° Ð¸Ð·Ð¾Ð±ÑÐ°Ð¶ÐµÐ½Ð¸Ñ (ÐÐºÐ¾Ð½ÐºÐ° Ð¸ ÐÐ°Ð½Ð½ÐµÑ)
+ local iconUrl = "https://cdn.discordapp.com/icons/" .. g.id .. "/" .. g.icon .. ".png?size=1024"
+ local bannerUrl = g.banner and ("https://cdn.discordapp.com/banners/" .. g.id .. "/" .. g.banner .. ".png?size=512") or ""
+
+ -- Ð¡Ð¾Ð·Ð´Ð°ÐµÐ¼ ÐºÐ°ÑÑÐ¾ÑÐºÑ Ð² ÑÐ²Ð¾ÐµÐ¼ HomeTab
+ HomeTab:Paragraph({
+ Title = g.name,
+ Desc = (g.description or "Welcome to NexorHub!") .. 
+ "\n\nð¢ Online Members: " .. onlineMembers .. 
+ "\nð¥ Total Members: " .. totalMembers,
+ Image = iconUrl,
+ Thumbnail = bannerUrl,
+ ImageSize = 48,
+ Buttons = {
+ {
+ Title = "Copy Invite Link",
+ Icon = "link",
+ Callback = function()
+ setclipboard("https://discord.gg/" .. InviteCode)
+ print("ð Copied!")
+ end
+ }
+ }
+ })
+else
+ -- ÐÑÐ»Ð¸ API Ð½ÐµÐ´Ð¾ÑÑÑÐ¿Ð½Ð¾ Ð¸Ð»Ð¸ ÐºÐ¾Ð´ Ð½ÐµÐ²ÐµÑÐ½ÑÐ¹
+ HomeTab:Paragraph({
+ Title = "NexorHub Discord",
+ Desc = "Error.\nLink: discord.gg/" .. InviteCode,
+ Icon = "alert-circle"
+ })
+end
+
+
+local function forceOpen()
+ task.wait(0.5) -- ÐÐ´ÐµÐ¼, Ð¿Ð¾ÐºÐ° GUI Ð¿ÑÐ¾Ð³ÑÑÐ·Ð¸ÑÑÑ
+ if HomeTab then
+ -- ÐÑÐ¾Ð±ÑÐµÐ¼ Ð²ÑÐµ Ð²Ð¾Ð·Ð¼Ð¾Ð¶Ð½ÑÐµ Ð¼ÐµÑÐ¾Ð´Ñ Ð°ÐºÑÐ¸Ð²Ð°ÑÐ¸Ð¸ Ð² WindUI
+ if HomeTab.Select then HomeTab:Select()
+ elseif HomeTab.Show then HomeTab:Show()
+ elseif Window.SelectTab then Window:SelectTab(HomeTab)
+ end
+ end
+end
+
+-- ÐÐ°Ð¿ÑÑÐºÐ°ÐµÐ¼ Ð¸Ð¼Ð¸ÑÐ°ÑÐ¸Ñ
+task.spawn(forceOpen)
+
+
+local MainTab = Window:Tab({
+ Title = "Combat", -- Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð²ÐºÐ»Ð°Ð´ÐºÐ¸
+ Icon = "sword", -- Ð¸ÐºÐ¾Ð½ÐºÐ° (Ð¾Ð¿ÑÐ¸Ð¾Ð½Ð°Ð»ÑÐ½Ð¾, ÑÐ¼. ÑÐ¿Ð¸ÑÐ¾Ðº Ð¸ÐºÐ¾Ð½Ð¾Ðº Ð² Ð´Ð¾ÐºÑÐ¼ÐµÐ½ÑÐ°ÑÐ¸Ð¸ WindUI)
+ Color = Color3.fromHex("#4CAF50") -- ÑÐ²ÐµÑ Ð²ÐºÐ»Ð°Ð´ÐºÐ¸ (Ð¾Ð¿ÑÐ¸Ð¾Ð½Ð°Ð»ÑÐ½Ð¾)
+})
+
+ local OverviewSection1 = MainTab:Section({
+ Title = "Others"
+ })
+
+MainTab:Toggle({
+ Title = "Wall Combo Everywhere",
+ Name = "Wall Combo Everywhere", -- ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÐºÐ½Ð¾Ð¿ÐºÐ¸
+ Default = false, -- ÐÐ°ÑÐ°Ð»ÑÐ½Ð¾Ðµ ÑÐ¾ÑÑÐ¾ÑÐ½Ð¸Ðµ (false/true)
+ Callback = function(state) -- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿ÑÐ¸ Ð¿ÐµÑÐµÐºÐ»ÑÑÐµÐ½Ð¸Ð¸
+ Type = "Toggle"
+ if state then
+ print("On")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local PART_SIZE = Vector3.new(5, 15, 1)
+local PART_DISTANCE = 5
+local PART_OFFSET_Y = 0
+local PART_COLOR = BrickColor.new("Bright blue")
+local PART_MATERIAL = Enum.Material.Plastic
+local FOLDER_NAME = "Map"
+local COLLISION_GROUP = "Map"
+
+local localPlayer = Players.LocalPlayer
+if not localPlayer then
+ return
+end
+
+local thinPart = nil
+
+local function createThinPart()
+ if thinPart and thinPart.Parent then
+ thinPart:Destroy()
+ end
+ 
+ thinPart = Instance.new("Part")
+ thinPart.Name = "WallComboWallExploid"
+ thinPart.Size = PART_SIZE
+ thinPart.Anchored = true
+ thinPart.CanCollide = true
+ thinPart.CanTouch = false
+ thinPart.BrickColor = PART_COLOR
+ thinPart.Material = PART_MATERIAL
+ thinPart.Transparency = 0.9
+ thinPart.Archivable = false
+
+ local folder = workspace:FindFirstChild(FOLDER_NAME)
+ if not folder then
+ folder = Instance.new("Folder")
+ folder.Name = FOLDER_NAME
+ folder.Parent = workspace
+ end
+ thinPart.Parent = folder
+end
+
+local function updatePartPosition()
+ if not thinPart or not localPlayer.Character then
+ return
+ end
+
+ local rootPart = localPlayer.Character:FindFirstChild("HumanoidRootPart")
+ if not rootPart then
+ return
+ end
+
+ local targetCFrame = rootPart.CFrame * CFrame.new(0, PART_OFFSET_Y, -PART_DISTANCE)
+ thinPart.CFrame = targetCFrame
+end
+
+local function setupFollowingPart(character)
+ createThinPart()
+ RunService:BindToRenderStep("FollowPart", Enum.RenderPriority.Camera.Value + 1, updatePartPosition)
+end
+
+localPlayer.CharacterAdded:Connect(setupFollowingPart)
+
+if localPlayer.Character then
+ setupFollowingPart(localPlayer.Character)
+end
+
+game.GameClosing:Connect(function()
+ if thinPart then
+ thinPart:Destroy()
+ end
+ RunService:UnbindFromRenderStep("WalLComboWallExploid")
+end)
+ else
+ print("Off")
+local mapFolder = game:GetService("Workspace"):FindFirstChild("Map")
+
+
+if mapFolder then
+ local targetObjects = mapFolder:GetChildren()
+ for _, obj in ipairs(targetObjects) do
+ if obj.Name == "WallComboWallExploid" then
+ obj:Destroy()
+ end
+ end
+end
+
+ end
+ end
+})
+
+MainTab:Toggle({
+ Title = "Longer Ultimate Time",
+ Name = "Longer Ultimate Time", -- ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÐºÐ½Ð¾Ð¿ÐºÐ¸
+ Default = false, -- ÐÐ°ÑÐ°Ð»ÑÐ½Ð¾Ðµ ÑÐ¾ÑÑÐ¾ÑÐ½Ð¸Ðµ (false/true)
+ Callback = function(state) -- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿ÑÐ¸ Ð¿ÐµÑÐµÐºÐ»ÑÑÐµÐ½Ð¸Ð¸
+ Type = "Toggle"
+ if state then
+ print("On")
+ local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Toggles.MultiUseCutscenes"
+local multiUseCutscenes = findObjectByPath(ReplicatedStorage, targetPath)
+
+if multiUseCutscenes and multiUseCutscenes:IsA("BoolValue") then
+ multiUseCutscenes.Value = true
+end
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Multipliers.UltimateTimer"
+local ultimateTimer = findObjectByPath(ReplicatedStorage, targetPath)
+
+if ultimateTimer and ultimateTimer:IsA("IntValue") then
+ ultimateTimer.Value = 999999
+end
+ else
+ print("Off")
+ local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Toggles.MultiUseCutscenes"
+local multiUseCutscenes = findObjectByPath(ReplicatedStorage, targetPath)
+
+if multiUseCutscenes and multiUseCutscenes:IsA("BoolValue") then
+ multiUseCutscenes.Value = false
+end
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Multipliers.UltimateTimer"
+local ultimateTimer = findObjectByPath(ReplicatedStorage, targetPath)
+
+if ultimateTimer and ultimateTimer:IsA("IntValue") then
+ ultimateTimer.Value = 100
+end
+ end
+ end
+})
+
+
+MainTab:Toggle({
+ Title = "InstantTransformation",
+ Name = "InstantTransformation", -- ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÐºÐ½Ð¾Ð¿ÐºÐ¸
+ Default = false, -- ÐÐ°ÑÐ°Ð»ÑÐ½Ð¾Ðµ ÑÐ¾ÑÑÐ¾ÑÐ½Ð¸Ðµ (false/true)
+ Callback = function(state) -- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿ÑÐ¸ Ð¿ÐµÑÐµÐºÐ»ÑÑÐµÐ½Ð¸Ð¸
+ Type = "Toggle"
+ if state then
+ print("On")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Toggles.InstantTransformation"
+local InstantTransformation = findObjectByPath(ReplicatedStorage, targetPath)
+
+if InstantTransformation and InstantTransformation:IsA("BoolValue") then
+ InstantTransformation.Value = true
+end
+ else
+ print("Off")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Toggles.InstantTransformation"
+local InstantTransformation = findObjectByPath(ReplicatedStorage, targetPath)
+
+if InstantTransformation and InstantTransformation:IsA("BoolValue") then
+ InstantTransformation.Value = false
+end
+ end
+ end
+})
+
+
+ local OverviewSection1 = MainTab:Section({
+ Title = "Player"
+ })
+
+
+MainTab:Toggle({
+ Title = "DisableCombatTimer",
+ Name = "DisableCombatTimer", -- ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÐºÐ½Ð¾Ð¿ÐºÐ¸
+ Default = false, -- ÐÐ°ÑÐ°Ð»ÑÐ½Ð¾Ðµ ÑÐ¾ÑÑÐ¾ÑÐ½Ð¸Ðµ (false/true)
+ Callback = function(state) -- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿ÑÐ¸ Ð¿ÐµÑÐµÐºÐ»ÑÑÐµÐ½Ð¸Ð¸
+ Type = "Toggle"
+ if state then
+ print("On")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Toggles.DisableCombatTimer"
+local DisableCombatTimer = findObjectByPath(ReplicatedStorage, targetPath)
+
+if DisableCombatTimer and DisableCombatTimer:IsA("BoolValue") then
+ DisableCombatTimer.Value = true
+end
+ else
+ print("Off")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Toggles.DisableCombatTimer"
+local DisableCombatTimer = findObjectByPath(ReplicatedStorage, targetPath)
+
+if DisableCombatTimer and DisableCombatTimer:IsA("BoolValue") then
+ DisableCombatTimer.Value = false
+end
+ end
+ end
+})
+
+MainTab:Toggle({
+ Title = "NoStunOnMiss",
+ Name = "NoStunOnMiss", -- ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÐºÐ½Ð¾Ð¿ÐºÐ¸
+ Default = false, -- ÐÐ°ÑÐ°Ð»ÑÐ½Ð¾Ðµ ÑÐ¾ÑÑÐ¾ÑÐ½Ð¸Ðµ (false/true)
+ Callback = function(state) -- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿ÑÐ¸ Ð¿ÐµÑÐµÐºÐ»ÑÑÐµÐ½Ð¸Ð¸
+ Type = "Toggle"
+ if state then
+ print("On")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Toggles.DisableHitStun"
+local NoStunOnMiss = findObjectByPath(ReplicatedStorage, targetPath)
+
+if NoStunOnMiss and NoStunOnMiss:IsA("BoolValue") then
+ NoStunOnMiss.Value = true
+end
+ else
+ print("Off")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Toggles.DisableHitStun"
+local NoStunOnMiss = findObjectByPath(ReplicatedStorage, targetPath)
+
+if NoStunOnMiss and NoStunOnMiss:IsA("BoolValue") then
+ NoStunOnMiss.Value = false
+end
+ end
+ end
+})
+
+MainTab:Toggle({
+ Title = "NoSlowdowns",
+ Name = "NoSlowdowns", -- ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÐºÐ½Ð¾Ð¿ÐºÐ¸
+ Default = false, -- ÐÐ°ÑÐ°Ð»ÑÐ½Ð¾Ðµ ÑÐ¾ÑÑÐ¾ÑÐ½Ð¸Ðµ (false/true)
+ Callback = function(state) -- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿ÑÐ¸ Ð¿ÐµÑÐµÐºÐ»ÑÑÐµÐ½Ð¸Ð¸
+ Type = "Toggle"
+ if state then
+ print("On")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Toggles.NoSlowdowns"
+local NoSlowdowns = findObjectByPath(ReplicatedStorage, targetPath)
+
+if NoSlowdowns and NoSlowdowns:IsA("BoolValue") then
+ NoSlowdowns.Value = true
+end
+ else
+ print("Off")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function findObjectByPath(root, path)
+ local parts = string.split(path, ".")
+ local current = root
+
+ for _, part in ipairs(parts) do
+ if current:FindFirstChild(part) then
+ current = current[part]
+ else
+ return nil
+ end
+ end
+
+ return current
+end
+
+local targetPath = "Settings.Toggles.NoSlowdowns"
+local NoSlowdowns = findObjectByPath(ReplicatedStorage, targetPath)
+
+if NoSlowdowns and NoSlowdowns:IsA("BoolValue") then
+ NoSlowdowns.Value = false
+end
+ end
+ end
+})
+
+
+ local OverviewSection1 = MainTab:Section({
+ Title = "Emotes"
+ })
+
+
+MainTab:Toggle({
+ Title = "UnStop Emote",
+ Name = "UnStop Emote", -- ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÐºÐ½Ð¾Ð¿ÐºÐ¸
+ Default = false, -- ÐÐ°ÑÐ°Ð»ÑÐ½Ð¾Ðµ ÑÐ¾ÑÑÐ¾ÑÐ½Ð¸Ðµ (false/true)
+ Callback = function(state) -- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿ÑÐ¸ Ð¿ÐµÑÐµÐºÐ»ÑÑÐµÐ½Ð¸Ð¸
+ Type = "Toggle"
+ if state then
+ print("On")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+local function moveRemoteEvent()
+ -- Ð¤Ð¾ÑÐ¼Ð¸ÑÑÐµÐ¼ Ð¿ÑÑÑ Ðº Ð¾Ð±ÑÐµÐºÑÑ
+ local path = "Remotes.Combat.EmoteStop"
+ local parts = string.split(path, ".")
+ local target = ReplicatedStorage
+ 
+ -- ÐÑÐ¾ÑÐ¾Ð´Ð¸Ð¼ Ð¿Ð¾ Ð¸ÐµÑÐ°ÑÑÐ¸Ð¸
+ for _, partName in ipairs(parts) do
+ if target:FindFirstChild(partName) then
+ target = target[partName]
+ else
+ -- ÐÐ±ÑÐµÐºÑ Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½ Ð¿Ð¾ Ð¿ÑÑÐ¸
+ return false
+ end
+ end
+ 
+ -- ÐÑÐ¾Ð²ÐµÑÑÐµÐ¼, ÑÑÐ¾ Ð½Ð°Ð¹Ð´ÐµÐ½Ð½ÑÐ¹ Ð¾Ð±ÑÐµÐºÑ â RemoteEvent
+ if not target:IsA("RemoteEvent") then
+ return false
+ end
+ 
+ -- ÐÐµÑÐµÐ¼ÐµÑÐ°ÐµÐ¼ Ð² Workspace
+ target.Parent = Workspace
+ return true
+end
+
+-- ÐÑÐ¿Ð¾Ð»Ð½ÑÐµÐ¼ Ð¿ÐµÑÐµÐ¼ÐµÑÐµÐ½Ð¸Ðµ
+local success = moveRemoteEvent()
+ else
+ print("Off")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+local function moveRemoteEvent()
+ -- ÐÐ¼Ñ Ð¸ÑÐºÐ¾Ð¼Ð¾Ð³Ð¾ RemoteEvent Ð² Workspace
+ local remoteName = "EmoteStop"
+ 
+ -- ÐÑÐµÐ¼ RemoteEvent Ð½ÐµÐ¿Ð¾ÑÑÐµÐ´ÑÑÐ²ÐµÐ½Ð½Ð¾ Ð² Workspace
+ local target = Workspace:FindFirstChild(remoteName)
+ 
+ -- ÐÑÐ¾Ð²ÐµÑÑÐµÐ¼, Ð½Ð°Ð¹Ð´ÐµÐ½ Ð»Ð¸ Ð¾Ð±ÑÐµÐºÑ Ð¸ ÑÐ²Ð»ÑÐµÑÑÑ Ð»Ð¸ Ð¾Ð½ RemoteEvent
+ if not target then
+ return false
+ end
+ 
+ if not target:IsA("RemoteEvent") then
+ return false
+ end
+ 
+ -- ÐÐ°ÑÐ¾Ð´Ð¸Ð¼ Ð¸Ð»Ð¸ ÑÐ¾Ð·Ð´Ð°ÑÐ¼ ÑÐµÐ¿Ð¾ÑÐºÑ Ð¿Ð°Ð¿Ð¾Ðº: ReplicatedStorage â Remotes â Combat
+ local remotesFolder = ReplicatedStorage:FindFirstChild("Remotes")
+ if not remotesFolder then
+ remotesFolder = Instance.new("Folder")
+ remotesFolder.Name = "Remotes"
+ remotesFolder.Parent = ReplicatedStorage
+ end
+ 
+ local combatFolder = remotesFolder:FindFirstChild("Combat")
+ if not combatFolder then
+ combatFolder = Instance.new("Folder")
+ combatFolder.Name = "Combat"
+ combatFolder.Parent = remotesFolder
+ end
+ 
+ -- ÐÐµÑÐµÐ¼ÐµÑÐ°ÐµÐ¼ RemoteEvent Ð² ÐºÐ¾Ð½ÐµÑÐ½ÑÑ Ð¿Ð°Ð¿ÐºÑ
+ target.Parent = combatFolder
+ return true
+end
+
+-- ÐÑÐ¿Ð¾Ð»Ð½ÑÐµÐ¼ Ð¿ÐµÑÐµÐ¼ÐµÑÐµÐ½Ð¸Ðµ
+local success = moveRemoteEvent()
+
+ end
+ end
+})
+
+
+local CharacterTab = Window:Tab({
+ Title = "Character", -- Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð²ÐºÐ»Ð°Ð´ÐºÐ¸
+ Icon = "user", -- Ð¸ÐºÐ¾Ð½ÐºÐ° (Ð¾Ð¿ÑÐ¸Ð¾Ð½Ð°Ð»ÑÐ½Ð¾, ÑÐ¼. ÑÐ¿Ð¸ÑÐ¾Ðº Ð¸ÐºÐ¾Ð½Ð¾Ðº Ð² Ð´Ð¾ÐºÑÐ¼ÐµÐ½ÑÐ°ÑÐ¸Ð¸ WindUI)
+ Color = Color3.fromHex("#4CAF50") -- ÑÐ²ÐµÑ Ð²ÐºÐ»Ð°Ð´ÐºÐ¸ (Ð¾Ð¿ÑÐ¸Ð¾Ð½Ð°Ð»ÑÐ½Ð¾)
+})
+
+ local OverviewSection1 = CharacterTab:Section({
+ Title = "Others"
+ })
+
+-- ÐÐ»Ð¾Ð±Ð°Ð»ÑÐ½ÑÐµ Ð¿ÐµÑÐµÐ¼ÐµÐ½Ð½ÑÐµ
+getgenv().SpeedEnabled = false
+getgenv().SpeedValue = 100
+
+-- 1. Ð¡Ð»Ð°Ð¹Ð´ÐµÑ (ÑÐ²ÐµÑÑÑ)
+CharacterTab:Slider({
+ Title = "Speed Walk/Run (CFrame)",
+ Step = 1,
+ Width = 200,
+ Value = {
+ Min = 1,
+ Max = 1000,
+ Default = 1,
+ },
+ Callback = function(value)
+ -- Ð ÑÐ²Ð¾ÐµÐ¼ ÑÐ»Ð°Ð¹Ð´ÐµÑÐµ 'value' Ð¼Ð¾Ð¶ÐµÑ Ð¿ÑÐ¸ÑÐ¾Ð´Ð¸ÑÑ ÐºÐ°Ðº ÑÐ°Ð±Ð»Ð¸ÑÐ° Ð¸Ð»Ð¸ ÑÐ¸ÑÐ»Ð¾
+ -- ÐÐ±ÑÑÐ½Ð¾ WindUI Ð²Ð¾Ð·Ð²ÑÐ°ÑÐ°ÐµÑ ÑÐ¸ÑÐ»Ð¾ Ð½Ð°Ð¿ÑÑÐ¼ÑÑ Ð² Callback
+ getgenv().SpeedValue = value
+ end
+})
+
+-- 2. ÐÐµÑÐµÐºÐ»ÑÑÐ°ÑÐµÐ»Ñ (ÑÐ½Ð¸Ð·Ñ)
+CharacterTab:Toggle({
+ Title = "Enable CFrame Speed",
+ Value = getgenv().SpeedEnabled,
+ Callback = function(state)
+ getgenv().SpeedEnabled = state
+ end
+})
+
+-- 3. ÐÐ¿ÑÐ¸Ð¼Ð¸Ð·Ð¸ÑÐ¾Ð²Ð°Ð½Ð½Ð°Ñ Ð»Ð¾Ð³Ð¸ÐºÐ° CFrame Ð´Ð²Ð¸Ð¶ÐµÐ½Ð¸Ñ
+local RunService = game:GetService("RunService")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+
+RunService.RenderStepped:Connect(function()
+ if not getgenv().SpeedEnabled then return end
+ 
+ local char = LocalPlayer.Character
+ local root = char and char:FindFirstChild("HumanoidRootPart")
+ local hum = char and char:FindFirstChild("Humanoid")
+ 
+ if root and hum and hum.MoveDirection.Magnitude > 0 then
+ -- ÐÑÑÐ¸ÑÐ»ÑÐµÐ¼ Ð¼Ð½Ð¾Ð¶Ð¸ÑÐµÐ»Ñ. Ð¢Ð°Ðº ÐºÐ°Ðº Ð·Ð½Ð°ÑÐµÐ½Ð¸Ñ Ð² ÑÐ»Ð°Ð¹Ð´ÐµÑÐµ Ð±Ð¾Ð»ÑÑÐ¸Ðµ (100-500), 
+ -- Ð´ÐµÐ»Ð¸Ð¼ Ð½Ð° 1000 Ð´Ð»Ñ Ð°Ð´ÐµÐºÐ²Ð°ÑÐ½Ð¾Ð¹ ÑÐºÐ¾ÑÐ¾ÑÑÐ¸ Ð¿ÐµÑÐµÐ¼ÐµÑÐµÐ½Ð¸Ñ
+ local multiplier = getgenv().SpeedValue / 1000
+ root.CFrame = root.CFrame + (hum.MoveDirection * multiplier)
+ end
+end)
+
+CharacterTab:Slider({
+ Title = "Speed Walk/Run (Default)",
+ Step = 1,
+ Width = 200,
+ Value = {
+ Min = 100,
+ Max = 500,
+ Default = 100, -- Ð½Ð°ÑÐ°Ð»ÑÐ½Ð¾Ðµ Ð·Ð½Ð°ÑÐµÐ½Ð¸Ðµ
+ },
+    Callback = function(newValue)
+        -- ÐÐ¾Ð»ÑÑÐ°ÐµÐ¼ Ð¿ÑÑÐ¸ Ðº Ð½Ð°ÑÑÑÐ¾Ð¹ÐºÐ°Ð¼
+        local runSpeed = game:GetService("ReplicatedStorage")
+            :FindFirstChild("Settings")
+            :FindFirstChild("Multipliers")
+            :FindFirstChild("RunSpeed")
+        
+        local walkSpeed = game:GetService("ReplicatedStorage")
+            :FindFirstChild("Settings")
+            :FindFirstChild("Multipliers")
+            :FindFirstChild("WalkSpeed")
+        
+        -- ÐÑÐ¾Ð²ÐµÑÑÐµÐ¼ ÑÑÑÐµÑÑÐ²Ð¾Ð²Ð°Ð½Ð¸Ðµ Ð¾Ð±ÑÐµÐºÑÐ¾Ð² Ð¸ Ð¾Ð±Ð½Ð¾Ð²Ð»ÑÐµÐ¼ Ð·Ð½Ð°ÑÐµÐ½Ð¸Ñ
+        if runSpeed and walkSpeed then
+            runSpeed.Value = newValue
+            walkSpeed.Value = newValue
+        else
+            warn("No work...")
+        end
+
+        -- ÐÐ¾Ð¿Ð¾Ð»Ð½Ð¸ÑÐµÐ»ÑÐ½Ð¾: Ð¾Ð±Ð½Ð¾Ð²Ð»ÑÐµÐ¼ ÑÐºÐ¾ÑÐ¾ÑÑÑ Ð¿ÐµÑÑÐ¾Ð½Ð°Ð¶Ð° (ÐµÑÐ»Ð¸ Ð½ÑÐ¶Ð½Ð¾)
+        local character = game:GetService("Players").LocalPlayer.Character
+        if character and character:FindFirstChild("Humanoid") then
+            character.Humanoid.WalkSpeed = newValue
+        end
+    end
+})
+
+    local OverviewSection1 = CharacterTab:Section({
+        Title = "Cooldowns"
+    })
+
+
+CharacterTab:Slider({
+    Title = "Wall Combo Cooldown",
+    Step = 1,           -- ÐÐ»Ñ IntValue Ð»ÑÑÑÐµ ÑÐµÐ»ÑÐ¹ ÑÐ°Ð³
+    Width = 200,
+    Value = {
+        Min = 0,
+        Max = 500,
+        Default = 100,
+    },
+    Callback = function(newValue)
+        -- ÐÐ¾Ð»ÑÑÐ°ÐµÐ¼ Ð¾Ð±ÑÐµÐºÑ WallCombo
+        local wallCombo = game:GetService("ReplicatedStorage")
+            :FindFirstChild("Settings")
+            :FindFirstChild("Cooldowns")
+            :FindFirstChild("WallCombo")
+
+        -- ÐÑÐ¾Ð²ÐµÑÑÐµÐ¼, ÑÑÐ¾ Ð¾Ð±ÑÐµÐºÑ ÑÑÑÐµÑÑÐ²ÑÐµÑ Ð¸ ÑÐ²Ð»ÑÐµÑÑÑ IntValue
+        if wallCombo and wallCombo:IsA("IntValue") then
+            wallCombo.Value = math.floor(newValue)  -- ÐÐºÑÑÐ³Ð»ÑÐµÐ¼ Ð´Ð¾ ÑÐµÐ»Ð¾Ð³Ð¾
+        else
+            warn("Crash!")
+        end
+    end
+})
+
+CharacterTab:Slider({
+    Title = "Melee Colldown",
+    Step = 1,           -- ÐÐ»Ñ IntValue Ð»ÑÑÑÐµ ÑÐµÐ»ÑÐ¹ ÑÐ°Ð³
+    Width = 200,
+    Value = {
+        Min = 0,
+        Max = 500,
+        Default = 100,
+    },
+    Callback = function(newValue)
+        -- ÐÐ¾Ð»ÑÑÐ°ÐµÐ¼ Ð¾Ð±ÑÐµÐºÑ WallCombo
+        local wallCombo = game:GetService("ReplicatedStorage")
+            :FindFirstChild("Settings")
+            :FindFirstChild("Cooldowns")
+            :FindFirstChild("Melee")
+
+        -- ÐÑÐ¾Ð²ÐµÑÑÐµÐ¼, ÑÑÐ¾ Ð¾Ð±ÑÐµÐºÑ ÑÑÑÐµÑÑÐ²ÑÐµÑ Ð¸ ÑÐ²Ð»ÑÐµÑÑÑ IntValue
+        if wallCombo and wallCombo:IsA("IntValue") then
+            wallCombo.Value = math.floor(newValue)  -- ÐÐºÑÑÐ³Ð»ÑÐµÐ¼ Ð´Ð¾ ÑÐµÐ»Ð¾Ð³Ð¾
+        else
+            warn("Crash!")
+        end
+    end
+})
+
+CharacterTab:Slider({
+    Title = "Dash Colldown",
+    Step = 1,           -- ÐÐ»Ñ IntValue Ð»ÑÑÑÐµ ÑÐµÐ»ÑÐ¹ ÑÐ°Ð³
+    Width = 200,
+    Value = {
+        Min = 0,
+        Max = 500,
+        Default = 100,
+    },
+    Callback = function(newValue)
+        -- ÐÐ¾Ð»ÑÑÐ°ÐµÐ¼ Ð¾Ð±ÑÐµÐºÑ WallCombo
+        local wallCombo = game:GetService("ReplicatedStorage")
+            :FindFirstChild("Settings")
+            :FindFirstChild("Cooldowns")
+            :FindFirstChild("Dash")
+
+        -- ÐÑÐ¾Ð²ÐµÑÑÐµÐ¼, ÑÑÐ¾ Ð¾Ð±ÑÐµÐºÑ ÑÑÑÐµÑÑÐ²ÑÐµÑ Ð¸ ÑÐ²Ð»ÑÐµÑÑÑ IntValue
+        if wallCombo and wallCombo:IsA("IntValue") then
+            wallCombo.Value = math.floor(newValue)  -- ÐÐºÑÑÐ³Ð»ÑÐµÐ¼ Ð´Ð¾ ÑÐµÐ»Ð¾Ð³Ð¾
+        else
+            warn("Crash!")
+        end
+    end
+})
+
+
+    local OverviewSection1 = HomeTab:Section({
+        Title = "ðUPDATESð",
+		TextSize = 30
+    })
+
+	    HomeTab:Section({
+        Title = [[12/20/2025: Kill Aura Updated! +Ignore Friends.]],
+        TextSize = 18,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+
+
+
+		    HomeTab:Section({
+        Title = [[12/21/2025(Part - 1): Added - sound effects, messages, changed icons and attach to player.]],
+        TextSize = 18,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+
+		    HomeTab:Section({
+        Title = [[12/21/2025(Part - 2): BIG KILL AURA UPDATE!]],
+        TextSize = 18,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+
+			    HomeTab:Section({
+        Title = [[12/21/2025(Part - 3): BIG KILL AURA UPDATE PART 2! Added all characters - Gon, Nanami, Mob, Sukuna, Stark.]],
+        TextSize = 18,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+	
+			    HomeTab:Section({
+        Title = [[12/21/2025(Part - 4): SPEEDS UPDATE! Added CFrame speed...]],
+        TextSize = 18,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+
+				    HomeTab:Section({
+        Title = [[01/01/2026: Added Discord server and more!]],
+        TextSize = 18,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+
+    				    HomeTab:Section({
+        Title = [[04/01/2026: Added: Hitboxes, Anti God Mode(K-Aura god mode bypass) and more!]],
+        TextSize = 18,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+
+        				    HomeTab:Section({
+        Title = [[06/01/2026: Fixed Hit Boxes, Deleted Anti God Mode (Dont Works), Added kill emotes (Spam and use ones), Updated Key Binds, Added Custom Game and Added Refresh White List for Auto Farm!]],
+        TextSize = 18,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+                            HomeTab:Section({
+        Title = [[07/01/2026: New theme for Ui and Multi Damage!]],
+        TextSize = 18,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+
+		    HomeTab:Section({
+        Title = [[Next update: Secret...]],
+        TextSize = 25,
+        TextTransparency = .35,
+        FontWeight = Enum.FontWeight.Medium,
+    })
+
+
+local VisualTab = Window:Tab({
+    Title = "Visual",  -- Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ðµ Ð²ÐºÐ»Ð°Ð´ÐºÐ¸
+    Icon = "geist:eye",           -- Ð¸ÐºÐ¾Ð½ÐºÐ° (Ð¾Ð¿ÑÐ¸Ð¾Ð½Ð°Ð»ÑÐ½Ð¾, ÑÐ¼. ÑÐ¿Ð¸ÑÐ¾Ðº Ð¸ÐºÐ¾Ð½Ð¾Ðº Ð² Ð´Ð¾ÐºÑÐ¼ÐµÐ½ÑÐ°ÑÐ¸Ð¸ WindUI)
+    Color = Color3.fromHex("#4CAF50")  -- ÑÐ²ÐµÑ Ð²ÐºÐ»Ð°Ð´ÐºÐ¸ (Ð¾Ð¿ÑÐ¸Ð¾Ð½Ð°Ð»ÑÐ½Ð¾)
+})
+
+    local OverviewSection1 = VisualTab:Section({
+        Title = "Players"
+    })
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local function applyRedHighlight(player)
+    if player == Players.LocalPlayer then return end
+    local character = player.Character or player.CharacterAdded:Wait()
+    character:WaitForChild("HumanoidRootPart")
+    character:WaitForChild("Head")
+    
+    local existingHighlight = character:FindFirstChild("RedHighlight")
+    if existingHighlight then existingHighlight:Destroy() end
+
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "RedHighlight"
+    highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+    highlight.FillColor = Color3.fromRGB(255, 100, 100)
+    highlight.OutlineTransparency = 0.5
+    highlight.FillTransparency = 0.8
+    highlight.Parent = character
+
+    character.ChildAdded:Connect(function(child)
+        if child:IsA("BasePart") and not child:FindFirstChildOfClass("Highlight") then
+            local partHighlight = Instance.new("Highlight", child)
+            partHighlight.OutlineColor = highlight.OutlineColor
+            partHighlight.FillColor = highlight.FillColor
+            partHighlight.OutlineTransparency = highlight.OutlineTransparency
+            partHighlight.FillTransparency = highlight.FillTransparency
+        end
+    end)
+end
+
+local function removeHighlight(player)
+    local character = player.Character
+    if character then
+        local highlight = character:FindFirstChild("RedHighlight")
+        if highlight then highlight:Destroy() end
+    end
+end
+
+-- ÐÐ½Ð¾Ð¿ÐºÐ°, ÐºÐ¾ÑÐ¾ÑÐ°Ñ Ð·Ð°Ð¿ÑÑÐºÐ°ÐµÑ Ð¿Ð¾Ð´ÑÐ²ÐµÑÐºÑ
+VisualTab:Button({
+	Title = "Esp V1",
+    Callback = function()
+        -- ÐÑÐ¸Ð¼ÐµÐ½ÑÐµÐ¼ ÐºÐ¾ Ð²ÑÐµÐ¼ ÑÐµÐºÑÑÐ¸Ð¼ Ð¸Ð³ÑÐ¾ÐºÐ°Ð¼
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= Players.LocalPlayer then
+                applyRedHighlight(player)
+            end
+        end
+        
+        -- ÐÐ¾Ð´ÐºÐ»ÑÑÐ°ÐµÐ¼ ÑÐ¾Ð±ÑÑÐ¸Ñ Ð´Ð»Ñ Ð½Ð¾Ð²ÑÑ Ð¸Ð³ÑÐ¾ÐºÐ¾Ð²
+        Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function()
+                applyRedHighlight(player)
+            end)
+            if player.Character then
+                applyRedHighlight(player)
+            end
+        end)
+        
+        Players.PlayerRemoving:Connect(removeHighlight)
+    end
+})
+
+
+    local OverviewSection1 = VisualTab:Section({
+        Title = "Character and More"
+    })
+
+	VisualTab:Button({
+    Title = "Fake Ping",
+    Callback = function()
+
+-- // Ð¡ÐºÑÐ¸Ð¿Ñ Ð´Ð»Ñ Ð¿Ð¾ÑÑÐ¾ÑÐ½Ð½Ð¾Ð¹ ÑÑÑÐ°Ð½Ð¾Ð²ÐºÐ¸ Ð·Ð½Ð°ÑÐµÐ½Ð¸Ñ Ping Ð½Ð° 999 (Ð±ÐµÐ· Ð¿ÑÐ¸Ð½ÑÐ¾Ð²)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+if LocalPlayer then
+    while true do
+        local InfoFolder = LocalPlayer:FindFirstChild("Info")
+
+        if InfoFolder then
+            
+            local PingValue = InfoFolder:FindFirstChild("Ping")
+
+            if PingValue and PingValue:IsA("IntValue") then
+                
+                PingValue.Value = 999
+                
+            else
+                break -- ÐÑÑÐ¾Ð´Ð¸Ð¼ Ð¸Ð· ÑÐ¸ÐºÐ»Ð°, ÐµÑÐ»Ð¸ Ð½Ðµ Ð½Ð°ÑÐ»Ð¸ IntValue 'Ping'
+            end
+            
+        else
+            break -- ÐÑÑÐ¾Ð´Ð¸Ð¼ Ð¸Ð· ÑÐ¸ÐºÐ»Ð°, ÐµÑÐ»Ð¸ Ð½Ðµ Ð½Ð°ÑÐ»Ð¸ Ð¿Ð°Ð¿ÐºÑ 'Info'
+        end
+
+        wait(0) 
+    end
+end
+
+    end
+})
+
+VisualTab:Button({
+    Title = "Fake Vip",
+    Callback = function()
+
+local Players = game:GetService("Players")
+
+-- 1. ÐÐ°ÑÐ¾Ð´Ð¸Ð¼ Ð¸Ð³ÑÐ¾ÐºÐ°, ÐºÐ¾ÑÐ¾ÑÑÐ¹ Ð·Ð°Ð¿ÑÑÑÐ¸Ð» ÑÑÐ¾Ñ ÑÐºÑÐ¸Ð¿Ñ (Ñ.Ðµ. Ð²Ð°Ñ)
+local LocalPlayer = Players.LocalPlayer
+
+if LocalPlayer then
+    print("Player has: " .. LocalPlayer.Name)
+
+    -- 2. ÐÐ°ÑÐ¾Ð´Ð¸Ð¼ Ð¿Ð°Ð¿ÐºÑ Passes Ð²Ð½ÑÑÑÐ¸ Ð²Ð°ÑÐµÐ³Ð¾ Ð¸Ð³ÑÐ¾ÐºÐ°
+    local PassesFolder = LocalPlayer:FindFirstChild("Passes")
+
+    if PassesFolder then
+        
+        -- 3. ÐÐ°ÑÐ¾Ð´Ð¸Ð¼ BoolValue Ñ Ð¸Ð¼ÐµÐ½ÐµÐ¼ VIP Ð²Ð½ÑÑÑÐ¸ Ð¿Ð°Ð¿ÐºÐ¸ Passes
+        local VIPValue = PassesFolder:FindFirstChild("VIP")
+
+        if VIPValue and VIPValue:IsA("BoolValue") then
+            
+            -- 4. ÐÐ·Ð¼ÐµÐ½ÑÐµÐ¼ Ð·Ð½Ð°ÑÐµÐ½Ð¸Ðµ Ð½Ð° TRUE
+            VIPValue.Value = true
+            print("On!: " .. tostring(VIPValue.Value))
+            
+        else
+            print("Crash")
+            print("Crash V2")
+        end
+        
+    else
+        print("Crash!")
+    end
+    
+else
+
+
+    print("Crash...")
+end
+
+    end
+})
+
+    local OverviewSection1 = MainTab:Section({
+        Title = "Special",
+		TextSize = 30
+    })
+
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- === ÐÐÐÐÐÐÐ¬ÐÐ«Ð ÐÐÐ¡Ð¢Ð ÐÐÐÐ ===
+getgenv().Configs = {
+    InstantKillRange = 60,
+    AuraEnabled = false,
+    AuraKey = "None", -- Ð¡ÑÐ´Ð° Ð±ÑÐ´ÐµÑ ÑÐ¾ÑÑÐ°Ð½ÑÑÑÑÑ Ð²ÑÐ±ÑÐ°Ð½Ð½Ð°Ñ ÐºÐ»Ð°Ð²Ð¸ÑÐ°
+    Whitelist = {}
+}
+
+-- === ÐÐ¡ÐÐÐÐÐÐÐ¢ÐÐÐ¬ÐÐ«Ð Ð¤Ð£ÐÐÐ¦ÐÐ ===
+
+local function HRP()
+    return LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+end
+
+local function lpdash()
+    local Character = LocalPlayer.Character
+    local v67 = HRP()
+    if v67 then
+        pcall(function()
+            require(ReplicatedStorage:WaitForChild("Core")).Library("Remote").Send("Dash", v67.CFrame, "L", 1)
+        end)
+    end
+end
+
+local function getAllTargets(range) 
+    local targets = {}
+    local hrpPart = HRP()
+    if not hrpPart then return targets end
+    local HRPPos = hrpPart.Position
+
+    for _, v in ipairs(Players:GetPlayers()) do
+        local character = v.Character
+        if character and v ~= LocalPlayer and v:FindFirstChild(' ') == nil then
+            if table.find(getgenv().Configs.Whitelist, v.Name) then continue end
+
+            local humanoid = character:FindFirstChild('Humanoid')
+            local root = character:FindFirstChild('HumanoidRootPart')
+            
+            if humanoid and root then
+                local distance = (root.Position - HRPPos).Magnitude
+                if distance <= range then
+                    local lpName = LocalPlayer.Name
+                    local cutscene = character:GetAttribute("Cutscene")
+                    local isValid = (not character:GetAttribute("Ignore") and 
+                                    (not cutscene or cutscene == LocalPlayer.Character:GetAttribute("Cutscene")) and 
+                                    ((not character:GetAttribute("Grabbed") or character:GetAttribute("Grabbed") == lpName) and 
+                                    (not character:GetAttribute("Victim") or character:GetAttribute("Victim") == lpName)) and 
+                                    not character:GetAttribute("Grabbing"))
+                    
+                    if isValid then
+                        table.insert(targets, character)
+                    end
+                end
+            end
+        end
+    end
+    return targets
+end
+
+local function MassKill()
+    local hrp = HRP()
+    if not hrp then return end
+    
+    local targets = getAllTargets(getgenv().Configs.InstantKillRange) 
+    if #targets == 0 then return end
+
+    local data = LocalPlayer:FindFirstChild("Data")
+    local charVal = data and data:FindFirstChild("Character") and data.Character.Value
+    if not charVal then return end
+
+    local charFolder = ReplicatedStorage.Characters:FindFirstChild(charVal)
+    if charFolder and charFolder:FindFirstChild("WallCombo") then
+        local WallCombo = charFolder.WallCombo
+        local multiHitList = {}
+        local stackCount = (charVal == "Gon") and 20 or 50
+        
+        for _, victimChar in ipairs(targets) do
+            for i = 1, stackCount do
+                table.insert(multiHitList, victimChar)
+            end
+        end
+
+        ReplicatedStorage.Remotes.Abilities.Ability:FireServer(WallCombo, 69)
+        game.ReplicatedStorage.Remotes.Combat.Action:FireServer(WallCombo, "", 4, 69, {
+            BestHitCharacter = nil,
+            HitCharacters = multiHitList,
+            Ignore = {},
+            Actions = {}
+        })
+    end
+end
+
+-- === ÐÐÐÐÐÐ ÐÐÐÐÐ¢ÐÐ (ÐÐÐÐ) ===
+local AuraToggle; -- Ð¡ÑÑÐ»ÐºÐ° Ð½Ð° Ð¾Ð±ÑÐµÐºÑ ÑÐ¾Ð³Ð³Ð»Ð° Ð´Ð»Ñ Ð¿ÑÐ¾Ð³ÑÐ°Ð¼Ð¼Ð½Ð¾Ð³Ð¾ Ð¿ÐµÑÐµÐºÐ»ÑÑÐµÐ½Ð¸Ñ
+
+UserInputService.InputBegan:Connect(function(input, isProcessed)
+    if isProcessed then return end
+    
+    local pressedKey = input.KeyCode.Name
+    -- ÐÑÐµÐ¾Ð±ÑÐ°Ð·ÑÐµÐ¼ Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ñ ÑÐ¸ÑÑ, ÐµÑÐ»Ð¸ Ð¾Ð½Ð¸ Ð²ÑÐ±ÑÐ°Ð½Ñ Ð² Ð´ÑÐ¾Ð¿Ð´Ð°ÑÐ½Ðµ
+    if pressedKey == "One" then pressedKey = "One" end 
+    
+    if pressedKey == getgenv().Configs.AuraKey and getgenv().Configs.AuraKey ~= "None" then
+        local newState = not getgenv().Configs.AuraEnabled
+        -- ÐÐµÑÐµÐºÐ»ÑÑÐ°ÐµÐ¼ Ð²Ð¸Ð·ÑÐ°Ð»ÑÐ½Ð¾ Ð² Ð¼ÐµÐ½Ñ
+        if AuraToggle then
+            pcall(function()
+                if AuraToggle.SetValue then AuraToggle:SetValue(newState)
+                elseif AuraToggle.Set then AuraToggle:Set(newState) end
+            end)
+        end
+    end
+end)
+
+-- === ÐÐÐÐ£ÐÐÐÐÐÐ¦ÐÐ¯ ===
+local RangeCircle = Instance.new("CylinderHandleAdornment")
+RangeCircle.Name = "AuraVisual"
+RangeCircle.Transparency = 0.6
+RangeCircle.Color3 = Color3.fromRGB(0, 200, 255)
+RangeCircle.Angle = 360
+RangeCircle.Height = 0.05
+RangeCircle.AlwaysOnTop = false
+RangeCircle.ZIndex = 10
+RangeCircle.Parent = game.CoreGui
+
+task.spawn(function()
+    while true do
+        local hrp = HRP()
+        if hrp and getgenv().Configs.AuraEnabled then
+            RangeCircle.Visible = true
+            RangeCircle.Adornee = hrp
+            RangeCircle.CFrame = CFrame.new(0, -2.8, 0) * CFrame.Angles(math.rad(90), 0, 0)
+            RangeCircle.Radius = getgenv().Configs.InstantKillRange
+            RangeCircle.InnerRadius = getgenv().Configs.InstantKillRange - 0.8
+        else
+            RangeCircle.Visible = false
+        end
+        task.wait()
+    end
+end)
+
+-- === ÐÐÐ¢ÐÐ Ð¤ÐÐÐ¡ ===
+
+AuraToggle = MainTab:Toggle({
+    Title = "Kill Aura",
+    Default = false,
+    Callback = function(state)
+        getgenv().Configs.AuraEnabled = state
+        if state then
+            task.spawn(function()
+                while getgenv().Configs.AuraEnabled do
+                    lpdash()
+                    task.wait(0.5)
+                end
+            end)
+            task.spawn(function()
+                while getgenv().Configs.AuraEnabled do
+                    MassKill()
+                    task.wait() 
+                end
+            end)
+        end
+    end
+})
+
+MainTab:Dropdown({
+    Title = "Aura Keybind",
+    Values = {"None", "T", "E", "Y", "R", "V", "B", "N", "H", "U", "I", "One", "Two"},
+    Default = "None",
+    Callback = function(val)
+        getgenv().Configs.AuraKey = val
+    end
+})
+
+MainTab:Slider({
+    Title = "Aura Range",
+    Step = 1,
+    Value = { Min = 5, Max = 60, Default = 60 },
+    Callback = function(v)
+        getgenv().Configs.InstantKillRange = v
+    end
+})
+
+-- ÐÐ°Ð¹ÑÐ»Ð¸ÑÑ (Ð±ÐµÐ·Ð¾Ð¿Ð°ÑÐ½ÑÐ¹ ÐºÐ¾Ð´)
+local function getPlayerList()
+    local list = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then table.insert(list, p.Name) end
+    end
+    return list
+end
+
+local PlayerDrop;
+PlayerDrop = MainTab:Dropdown({
+    Title = "Whitelist Players",
+    Values = getPlayerList(),
+    Callback = function(v)
+        local f = table.find(getgenv().Configs.Whitelist, v)
+        if f then table.remove(getgenv().Configs.Whitelist, f) else table.insert(getgenv().Configs.Whitelist, v) end
+        
+        local txt = "Selected: " .. table.concat(getgenv().Configs.Whitelist, ", ")
+        if #getgenv().Configs.Whitelist == 0 then txt = "Selected: None" end
+        
+        pcall(function() 
+            if PlayerDrop.SetDesc then PlayerDrop:SetDesc(txt) 
+            elseif PlayerDrop.Description then PlayerDrop.Description.Text = txt end
+        end)
+    end
+})
+
+MainTab:Button({
+    Title = "Refresh Whitelist",
+    Callback = function()
+        pcall(function() 
+            if PlayerDrop.Refresh then PlayerDrop:Refresh(getPlayerList(), true) end
+        end)
+    end
+})
+
+-- Ð¿Ð°Ð¼ÐµÑÐºÐ° Ð´Ð»Ñ Ð¼ÐµÐ½Ñ! ÐÐ° PVP Ð¼Ð¾Ð¶Ð½Ð¾ Ð´Ð¾Ð±Ð°Ð²Ð¸ÑÑ ÐµÑÑ Ð²Ð°Ð»Ð» Ð¸ ÑÐ´
+    local OverviewSection1 = MainTab:Section({
+        Title = "PVP",
+		TextSize = 30
+    })
+
+-- === ÐÐÐ ÐÐÐÐÐÐ«Ð Ð ÐÐÐÐÐÐ (ÐÐ¡Ð¢ÐÐÐÐ¯Ð Ð MainTab) ===
+
+local TargetForAttach = nil 
+local AttachConnection = nil
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿Ð¾Ð»ÑÑÐµÐ½Ð¸Ñ ÑÐ¿Ð¸ÑÐºÐ° Ð¸Ð¼ÐµÐ½ (Ð¸ÑÐºÐ»ÑÑÐ°Ñ ÑÐµÐ±Ñ)
+local function getFreshNames()
+    local names = {}
+    for _, p in ipairs(game.Players:GetPlayers()) do
+        if p ~= game.Players.LocalPlayer then table.insert(names, p.Name) end
+    end
+    return names
+end
+
+-- 1. Ð¢Ð£ÐÐÐÐÐ  (ÐÐÐÐ®Ð§ÐÐÐÐ)
+MainTab:Toggle({
+    Title = "Attach Behind Back",
+    Callback = function(state)
+        getgenv().AttachActive = state
+        if state then
+            if not TargetForAttach then return end
+            local targetPlayer = game.Players:FindFirstChild(TargetForAttach)
+            
+            -- ÐÐ¾Ð´ÐºÐ»ÑÑÐ°ÐµÐ¼ ÑÐ¸ÐºÐ» Ð¿ÐµÑÐµÐ¼ÐµÑÐµÐ½Ð¸Ñ Ð¸Ð· Ð¢ÐµÑÐ°ÑÐ¸.txt
+            AttachConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if not getgenv().AttachActive then 
+                    if AttachConnection then AttachConnection:Disconnect() end 
+                    return 
+                end
+                
+                local p = game.Players.LocalPlayer
+                if targetPlayer and targetPlayer.Character and p.Character then
+                    local tRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if tRoot then
+                        -- ÐÐ¾Ð·Ð¸ÑÐ¸Ñ Ð·Ð° ÑÐ¿Ð¸Ð½Ð¾Ð¹ (Ð¼ÐµÑÐ¾Ð´ Ð¸Ð· ÑÐ²Ð¾ÐµÐ³Ð¾ ÑÐ°Ð¹Ð»Ð°)
+                        local targetCF = tRoot.CFrame * CFrame.new(0, 0.1, 4)
+                        pcall(function()
+                            require(p.PlayerScripts.Character.FullCustomReplication).Override(p.Character, targetCF)
+                        end)
+                    end
+                end
+            end)
+        else
+            if AttachConnection then AttachConnection:Disconnect() end
+        end
+    end
+})
+
+-- 2. ÐÐ«ÐÐÐÐÐ®Ð©ÐÐ Ð¡ÐÐÐ¡ÐÐ (ÐÐ«ÐÐÐ  ÐÐÐ ÐÐÐ)
+local TargetDrop = MainTab:Dropdown({
+    Title = "Select Attach Target",
+    Values = getFreshNames(),
+    Callback = function(v)
+        TargetForAttach = v
+    end
+})
+
+-- 3. ÐÐÐÐÐÐ ÐÐÐÐÐÐÐÐÐÐ¯ Ð¡ÐÐÐ¡ÐÐ
+MainTab:Button({
+    Title = "Refresh Attach List",
+    Callback = function()
+        local newList = getFreshNames()
+        -- ÐÑÑÐ°ÐµÐ¼ÑÑ Ð¾Ð±Ð½Ð¾Ð²Ð¸ÑÑ Ð·Ð½Ð°ÑÐµÐ½Ð¸Ñ Ð² Ð·Ð°Ð²Ð¸ÑÐ¸Ð¼Ð¾ÑÑÐ¸ Ð¾Ñ ÑÐ²Ð¾ÐµÐ¹ UI Ð±Ð¸Ð±Ð»Ð¸Ð¾ÑÐµÐºÐ¸
+        pcall(function()
+            if TargetDrop.SetValues then TargetDrop:SetValues(newList)
+            elseif TargetDrop.UpdateValues then TargetDrop:UpdateValues(newList)
+            elseif TargetDrop.Refresh then TargetDrop:Refresh(newList, true) end
+        end)
+    end
+})
+
+
+WindUI:Notify({
+    Title = "NexorHub",
+    Content = "Thanks for using! You cool.)",
+    Duration = 5,
+    Icon = "user",
+})
+
+
+local EmotesTab = Window:Tab({
+    Title = "Emotes",
+    Icon = "geist:accessibility",
+    Color = Color3.fromHex("#4CAF50")
+})	
+
+-- Ð¢Ð²Ð¾Ð¹ Ð¿Ð¾Ð»Ð½ÑÐ¹ ÑÐ¿Ð¸ÑÐ¾Ðº (Ñ Ð¸ÑÐ¿ÑÐ°Ð²Ð»ÐµÐ½Ð¸ÑÐ¼Ð¸)
+local MyFullOptions = {
+    "ACME", "Spine Breaker", "Neck Snap", "Think Mark", 
+    "Serious Sneeze", "Impostor", "Smite", "Spirit Trap", 
+    "Laser Eyes", "Vampire", "Avra Kadoovra", "Barbarian", 
+    "Blood Sugar", "Cauldron", "Goblin Bomb", "Naughty List", 
+    "Possession", "Rudolph's Revenge", "Snowball Cannon", 
+    "Snowflakes", "Werewolf", "Frost Breath", "Gingerbread", "Wrap It Up", "Sore Winner","Tinsel Strangle", "Tree Topper Slice", "Orthax", "Frostbound Prison", "Frozen Impalement", "Baldie's Demise", "Curb Stomp", "Bee", "Glacial Burial", "Surprise!", "Heart Rip", "Pollen Overload", "Selfie"
+}
+
+-- === ÐÐ ÐÐÐÐÐ£Ð ===
+local AbilityDropdown = EmotesTab:Dropdown({
+    Title = "Select Kill Emote",
+    Multi = false,
+    Options = MyFullOptions,
+    Values = MyFullOptions,
+    Default = "ACME",
+    Callback = function(value)
+        _G.SelectedAbility = value
+    end
+})
+
+-- === ÐÐÐÐÐÐ ÐÐ¡ÐÐÐÐÐÐÐÐ¯ ===
+EmotesTab:Button({
+    Title = "Set Kill Emote",
+    Desc = "Search and set EmoteEquipped",
+    Callback = function()
+        local chosen = _G.SelectedAbility or "ACME"
+        local player = game.Players.LocalPlayer
+        local targetValue = nil
+        
+        -- ÐÐ¾Ð¸ÑÐº StringValue Ð¿Ð¾ Ð²ÑÐµÐ¼Ñ Ð¸Ð³ÑÐ¾ÐºÑ Ð¸ Ð¿ÐµÑÑÐ¾Ð½Ð°Ð¶Ñ
+        local searchArea = {player, player.Character}
+        for _, area in pairs(searchArea) do
+            if area then
+                for _, obj in pairs(area:GetDescendants()) do
+                    if obj.Name == "EmoteEquipped" and obj:IsA("StringValue") then
+                        targetValue = obj
+                        break
+                    end
+                end
+            end
+            if targetValue then break end
+        end
+        
+        if targetValue then
+            -- Ð¢Ð²Ð¾Ð¹ ÑÐ¾ÑÐ¼Ð°Ñ Ð´Ð°Ð½Ð½ÑÑ
+            local newData = '[["KillEmote","' .. chosen .. '"],["Emote","None"],["Emote","None"],["Emote","None"],false,false,false,false]'
+            
+            targetValue.Value = newData
+            
+            WindUI:Notify({
+                Title = "NexorHub",
+                Content = "Set to: " .. chosen,
+                Duration = 2,
+                Color = Color3.fromRGB(0, 255, 100)
+            })
+            print("? NexorHub: " .. chosen .. " applied!")
+        else
+            WindUI:Notify({
+                Title = "Error",
+                Content = "EmoteEquipped NOT FOUND!",
+                Duration = 3,
+                Color = Color3.fromRGB(255, 50, 50)
+            })
+            print("? NexorHub: Could not find EmoteEquipped")
+        end
+    end
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- === ÐÐÐÐ¦ÐÐÐÐÐÐÐ¦ÐÐ¯ ===
+local core, originalHitBox
+pcall(function()
+    core = require(ReplicatedStorage:WaitForChild("Core", 9e9))
+end)
+
+local function initializeHitbox()
+    if typeof(core) == "table" and not originalHitBox then
+        local ok, combat = pcall(core.Get, "Combat", "Hit")
+        if ok and combat and combat.Box then
+            originalHitBox = combat.Box
+        end
+    end
+end
+
+-- === ÐÐÐÐÐÐ Ð¥ÐÐ¢ÐÐÐÐ¡Ð ===
+local function updateHitboxState(enabled)
+    if not core then return end
+    local ok, combat = pcall(core.Get, "Combat", "Hit")
+    if not ok or not combat then return end
+
+    if not originalHitBox then initializeHitbox() end
+
+    if enabled then
+        combat.Box = function(...)
+            local args = {...}
+            if deathCheck or not getgenv().HitboxEnabled or not args[3] or type(args[3]) ~= "table" then
+                return originalHitBox(...)
+            end
+
+            -- Ð Ð°ÑÑÐµÑ ÑÐ°Ð·Ð¼ÐµÑÐ¾Ð² Ð¸Ð· ÑÐ»Ð°Ð¹Ð´ÐµÑÐ¾Ð² 
+            local newSize
+            if getgenv().HitboxMethod == "Add" then
+                local originalSize = args[3].Size or Vector3.new(0, 0, 0)
+                newSize = Vector3.new(
+                    originalSize.X + getgenv().Size1,
+                    originalSize.Y + getgenv().Size2,
+                    originalSize.Z + getgenv().Size3
+                )
+            else
+                newSize = Vector3.new(getgenv().Size1, getgenv().Size2, getgenv().Size3)
+            end
+
+            -- LEGITIFY (Ð Ð°ÑÑÐ¸ÑÐµÐ½Ð¸Ðµ Ð±ÐµÐ· ÑÐ¼ÐµÑÐµÐ½Ð¸Ñ CFrame)
+            if getgenv().HitboxLegitify then
+                local modifiedArg3 = {}
+                for k, v in pairs(args[3]) do modifiedArg3[k] = v end
+                modifiedArg3.Size = newSize
+                
+                local bestTarget, validTargets = originalHitBox(args[1], args[2], modifiedArg3)
+                return bestTarget, validTargets
+            else
+                -- RAGE Ð ÐÐÐÐ
+                return originalHitBox(args[1], args[2], {Size = newSize})
+            end
+        end
+    else
+        if originalHitBox then combat.Box = originalHitBox end
+    end
+end
+
+-- === ÐÐÐ¢ÐÐ Ð¤ÐÐÐ¡ ===
+local HitboxTab = Window:Tab({ Name = "Hitboxes", Title = "Hitboxes", Icon = "geist:box" })
+
+-- ÐÐÐÐÐÐÐ¬ÐÐ«Ð ÐÐÐ ÐÐÐÐÐÐ«Ð
+getgenv().HitboxEnabled = false
+getgenv().HitboxLegitify = false
+getgenv().HitboxMethod = "Override"
+getgenv().Size1 = 15
+getgenv().Size2 = 15
+getgenv().Size3 = 40
+
+HitboxTab:Toggle({
+    Title = "Enable Hitbox",
+    Default = false,
+    Callback = function(v)
+        getgenv().HitboxEnabled = v
+        getgenv().HitboxLegitify = v
+        
+        if updateHitboxState then
+            updateHitboxState(v)
+        end
+    end
+})
+
+HitboxTab:Dropdown({
+    Title = "Hitbox Method",
+    Values = {"Override", "Add"},
+    Default = "Override",
+    Callback = function(v)
+        getgenv().HitboxMethod = (type(v) == "table" and v[1] or v)
+    end
+})
+
+-- Ð¡Ð»Ð°Ð¹Ð´ÐµÑÑ ÑÐ°Ð·Ð¼ÐµÑÐ¾Ð²
+HitboxTab:Slider({
+    Title = "(X) Size",
+    Step = 1,
+    Value = { Min = 35, Max = 250, Default = 25 },
+    Callback = function(v) getgenv().Size1 = v end
+})
+
+HitboxTab:Slider({
+    Title = "(Y) Size",
+    Step = 1,
+    Value = { Min = 35, Max = 250, Default = 25 },
+    Callback = function(v) getgenv().Size2 = v end
+})
+
+HitboxTab:Slider({
+    Title = "(Z) Size",
+    Step = 1,
+    Value = { Min = 10, Max = 250, Default = 40 },
+    Callback = function(v) getgenv().Size3 = v end
+})
+
+
+
+    local OverviewSection1 = MainTab:Section({
+        Title = "Farms",
+		TextSize = 30
+    })
+
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = Players.LocalPlayer
+
+-- === ÐÐÐÐÐÐÐ¬ÐÐ«Ð ÐÐÐ¡Ð¢Ð ÐÐÐÐ ===
+getgenv().MainEnabled = false
+getgenv().Whitelist = {}
+getgenv().LastPos = nil
+
+local Configs = {
+    Damage = 69,
+    Offset = Vector3.new(0, -6, 0), -- ÐÐ¸ÑÑÐ°Ð½ÑÐ¸Ñ Ð¿Ð¾Ð´ Ð¸Ð³ÑÐ¾ÐºÐ¾Ð¼
+    SafePos = CFrame.new(0, 5000, 0)  -- ÐÐ¾Ð·Ð¸ÑÐ¸Ñ Ð¾Ð¶Ð¸Ð´Ð°Ð½Ð¸Ñ
+}
+
+-- ÐÐ¾Ð´ÑÐ»Ñ Ð¿ÐµÑÐµÐ¼ÐµÑÐµÐ½Ð¸Ñ Ð¸Ð· Terapi 
+local ReplicationModule = require(LocalPlayer.PlayerScripts.Character.FullCustomReplication)
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿ÐµÑÐµÐ¼ÐµÑÐµÐ½Ð¸Ñ ÑÐµÑÐµÐ· Override 
+local function TerapiMove(targetCF)
+    local char = LocalPlayer.Character
+    if char and ReplicationModule and ReplicationModule.Override then
+        pcall(function()
+            ReplicationModule.Override(char, targetCF)
+        end)
+    end
+end
+
+-- === ÐÐÐ¢ÐÐ Ð¤ÐÐÐ¡ ===
+-- (ÐÑÐµÐ´Ð¿Ð¾Ð»Ð°Ð³Ð°ÐµÑÑÑ, ÑÑÐ¾ Ð±Ð¸Ð±Ð»Ð¸Ð¾ÑÐµÐºÐ° Rayfield/Ð´ÑÑÐ³Ð°Ñ ÑÐ¶Ðµ Ð·Ð°Ð³ÑÑÐ¶ÐµÐ½Ð°)
+local FarmToggle;
+FarmToggle = MainTab:Toggle({
+    Title = "Auto Farm",
+    Default = false,
+    Callback = function(state)
+        getgenv().MainEnabled = state
+        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        
+        if state then
+            if hrp then getgenv().LastPos = hrp.CFrame end
+        else
+            if hrp and getgenv().LastPos then
+                TerapiMove(getgenv().LastPos) -- ÐÐ¾Ð·Ð²ÑÐ°Ñ ÑÐµÑÐµÐ· Override
+                getgenv().LastPos = nil
+            end
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+                Camera.CameraSubject = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            end
+        end
+    end
+})
+
+-- === ÐÐÐÐÐÐ Ð¤ÐÐ ÐÐ ===
+local CurrentTarget = nil
+
+RunService.Heartbeat:Connect(function()
+    if not getgenv().MainEnabled then return end
+
+    local function isTargetValid(p)
+        if not p or p.Parent ~= Players then return false end
+        if table.find(getgenv().Whitelist, p.Name) then return false end
+        local char = p.Character
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        return char and char:FindFirstChild("HumanoidRootPart") and hum and hum.Health > 0.1
+    end
+
+    if not CurrentTarget or not isTargetValid(CurrentTarget) then
+        local potential = {}
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and isTargetValid(p) then table.insert(potential, p) end
+        end
+        CurrentTarget = #potential > 0 and potential[math.random(1, #potential)] or nil
+    end
+
+    if CurrentTarget then
+        local tRoot = CurrentTarget.Character.HumanoidRootPart
+        TerapiMove(tRoot.CFrame * CFrame.new(Configs.Offset))
+        Camera.CameraSubject = tRoot
+    else
+        TerapiMove(Configs.SafePos)
+    end
+end)
+
+-- === ÐÐÐÐÐÐ ÐÐ¢ÐÐÐ (WallCombo) ===
+task.spawn(function()
+    while true do
+        if getgenv().MainEnabled and CurrentTarget and CurrentTarget.Character then
+            pcall(function()
+                local data = LocalPlayer:FindFirstChild("Data")
+                local charVal = data and data:FindFirstChild("Character") and data.Character.Value
+                local wallCombo = ReplicatedStorage.Characters:FindFirstChild(charVal or ""):FindFirstChild("WallCombo")
+                
+                if wallCombo then
+                    local hits = {}
+                    for i = 1, 50 do table.insert(hits, CurrentTarget.Character) end
+
+                    ReplicatedStorage.Remotes.Abilities.Ability:FireServer(wallCombo, Configs.Damage)
+                    ReplicatedStorage.Remotes.Combat.Action:FireServer(wallCombo, "", 4, Configs.Damage, {
+                        BestHitCharacter = nil,
+                        HitCharacters = hits,
+                        Ignore = {},
+                        Actions = {}
+                    })
+                end
+            end)
+        end
+        task.wait(0.01) -- ÐÑÑÑÑÑÐ¹ ÑÐ¸ÐºÐ» Ð°ÑÐ°ÐºÐ¸
+    end
+end)
+
+-- ÐÐ¸Ð½Ð´ Ð½Ð° K
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end 
+    if input.KeyCode == Enum.KeyCode.K then
+        if FarmToggle then
+            local state = not getgenv().MainEnabled
+            pcall(function()
+                if FarmToggle.SetValue then FarmToggle:SetValue(state)
+                elseif FarmToggle.Set then FarmToggle:Set(state) end
+            end)
+        end
+    end
+end)
+
+
+MainTab:Section({Title = "Wall Combo"})
+
+
+-- === ÐÐÐ¡Ð¢Ð ÐÐÐÐ WALL COMBO ===
+local WallSettings = {
+    Enabled = false,
+    AttackSpeed = 1,
+    HitsPerFrame = 2,
+    CustomKey = "T"
+}
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local core = require(ReplicatedStorage:WaitForChild("Core", 9e9))
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¾Ð±ÑÐ¾Ð´Ð° Identity
+local function run_as_identity_2(fn)
+    local set_id = (syn and syn.set_thread_identity) or setthreadidentity
+    local get_id = (syn and syn.get_thread_identity) or getthreadidentity
+    local prev = get_id and get_id() or 2
+    if set_id then pcall(set_id, 2) end
+    local ok, res = pcall(fn)
+    if set_id then pcall(set_id, prev) end
+    return ok and res or nil
+end
+
+-- ÐÐ¾Ð³Ð¸ÐºÐ° ÑÐ´Ð°ÑÐ°
+local function execute_wall_logic()
+    if not WallSettings.Enabled then return end
+    
+    local lp = game.Players.LocalPlayer
+    local char = lp.Character
+    if not char or not char:FindFirstChild("Head") then return end
+
+    local data = lp:FindFirstChild("Data")
+    local charName = data and data:FindFirstChild("Character") and data.Character.Value
+    if not charName then return end
+
+    local skill = ReplicatedStorage.Characters[charName]:FindFirstChild("WallCombo")
+    if not skill then return end
+
+    local hitRes = run_as_identity_2(function()
+        return core.Get("Combat", "Hit").Box(nil, char, {Size = Vector3.new(50, 50, 50)})
+    end)
+
+    if hitRes then
+        run_as_identity_2(function()
+            local hits = WallSettings.AttackSpeed * 2 
+            for i = 1, hits do
+                if not WallSettings.Enabled then break end
+                pcall(core.Get("Combat", "Ability").Activate, skill, hitRes, char.Head.Position + Vector3.new(0, 0, 2.5))
+            end
+        end)
+    end
+end
+
+-- ÐÑÐ½Ð¾Ð²Ð½Ð¾Ð¹ ÑÐ¸ÐºÐ»
+RunService.Heartbeat:Connect(function()
+    if WallSettings.Enabled then
+        for i = 1, WallSettings.HitsPerFrame do
+            if not WallSettings.Enabled then break end
+            task.spawn(execute_wall_logic)
+        end
+    end
+end)
+
+-- === Ð­ÐÐÐÐÐÐ¢Ð« ÐÐÐ ÐÐ¢Ð¡Ð¢Ð£ÐÐÐ ===
+
+local WallToggle;
+WallToggle = MainTab:Toggle({
+    Title = "WallCombo Spam",
+    Default = false,
+    Callback = function(state)
+        WallSettings.Enabled = state
+    end
+})
+
+MainTab:Slider({
+    Title = "Wall Combo Speed",
+    Step = 1,
+    Value = {Min = 1, Max = 15, Default = 1},
+    Callback = function(value)
+        WallSettings.AttackSpeed = value
+        WallSettings.HitsPerFrame = value + 1
+    end
+})
+
+MainTab:Dropdown({
+    Title = "Keybind",
+    Values = {"None", "T", "E", "R", "F", "G", "V", "Q", "One", "Two"},
+    Default = "None",
+    Callback = function(val)
+        WallSettings.CustomKey = val
+    end
+})
+
+-- === ÐÐÐÐ: ÐÐÐÐ¢ÐÐ¦ÐÐ¯ ÐÐÐÐÐ¢ÐÐ¯ ÐÐ Ð¢Ð£ÐÐÐ ===
+UserInputService.InputBegan:Connect(function(input, isProcessed)
+    if isProcessed then return end
+    
+    -- ÐÐ¾Ð»ÑÑÐ°ÐµÐ¼ Ð¸Ð¼Ñ Ð½Ð°Ð¶Ð°ÑÐ¾Ð¹ ÐºÐ»Ð°Ð²Ð¸ÑÐ¸
+    local pressedKey = input.KeyCode.Name
+    if pressedKey == WallSettings.CustomKey then
+        if WallToggle then
+            -- ÐÑÑÐ¸ÑÐ»ÑÐµÐ¼ Ð½Ð¾Ð²Ð¾Ðµ ÑÐ¾ÑÑÐ¾ÑÐ½Ð¸Ðµ
+            local newState = not WallSettings.Enabled
+            
+            -- ÐÑÐ·ÑÐ²Ð°ÐµÐ¼ Ð¼ÐµÑÐ¾Ð´ SetValue, ÐºÐ¾ÑÐ¾ÑÑÐ¹ Ð² Wind UI ÑÑÐ¸Ð³Ð³ÐµÑÐ¸Ñ Ð°Ð½Ð¸Ð¼Ð°ÑÐ¸Ñ Ð¸ Callback
+            pcall(function()
+                if WallToggle.SetValue then
+                    WallToggle:SetValue(newState)
+                elseif WallToggle.Set then
+                    WallToggle:Set(newState)
+                end
+            end)
+        end
+    end
+end)
+
+-- === ÐÐÐ¡Ð¢Ð ÐÐÐÐ ===
+local WallSettings = {
+    SelectedKey = Enum.KeyCode.I, -- ÐÐ¾ ÑÐ¼Ð¾Ð»ÑÐ°Ð½Ð¸Ñ ÐºÐ»Ð°Ð²Ð¸ÑÐ° "I"
+}
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local lp = game:GetService("Players").LocalPlayer
+local core = require(ReplicatedStorage:WaitForChild("Core"))
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¾Ð±ÑÐ¾Ð´Ð° Identity
+local function run_as_identity_2(fn)
+    local set_id = (syn and syn.set_thread_identity) or setthreadidentity
+    local get_id = (syn and syn.get_thread_identity) or getthreadidentity
+    local prev = get_id and get_id() or 2
+    if set_id then pcall(set_id, 2) end
+    local ok, res = pcall(fn)
+    if set_id then pcall(set_id, prev) end
+    return ok and res or nil
+end
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¾Ð´Ð¸Ð½Ð¾ÑÐ½Ð¾Ð³Ð¾ ÑÐ´Ð°ÑÐ°
+local function fire_wall_combo()
+    local char = lp.Character
+    if not char or not char:FindFirstChild("Head") then return end
+
+    local data = lp:FindFirstChild("Data")
+    local charName = data and data:FindFirstChild("Character") and data.Character.Value
+    if not charName then return end
+
+    local skill = ReplicatedStorage.Characters[charName]:FindFirstChild("WallCombo")
+    if not skill then return end
+
+    local hitRes = run_as_identity_2(function()
+        return core.Get("Combat", "Hit").Box(nil, char, {Size = Vector3.new(50, 50, 50)})
+    end)
+
+    if hitRes then
+        run_as_identity_2(function()
+            pcall(core.Get("Combat", "Ability").Activate, skill, hitRes, char.Head.Position + Vector3.new(0, 0, 2.5))
+        end)
+    end
+end
+
+-- === ÐÐÐÐÐÐÐÐÐÐ Ð MAINTAB ===
+
+MainTab:Section({Title = ""})
+
+-- 1. ÐÐ½Ð¾Ð¿ÐºÐ° Ð´Ð»Ñ ÑÐµÐ»ÐµÑÐ¾Ð½Ð°
+MainTab:Button({
+    Title = "Wall Combo Execute",
+    Callback = function()
+        fire_wall_combo()
+    end
+})
+
+-- 2. ÐÑÐ¾Ð¿Ð´Ð°ÑÐ½ Ð´Ð»Ñ Ð²ÑÐ±Ð¾ÑÐ° ÐºÐ»Ð°Ð²Ð¸ÑÐ¸ (I Ð¿Ð¾ ÑÐ¼Ð¾Ð»ÑÐ°Ð½Ð¸Ñ)
+MainTab:Dropdown({
+    Title = "Select Keybind",
+    Values = {"None", "One", "Two", "E", "Q", "R", "F", "G", "Z", "X", "C"},
+    Default = "None",
+    Callback = function(val)
+        WallSettings.SelectedKey = Enum.KeyCode[val]
+        print("ð Bind changed to: " .. val)
+    end
+})
+
+-- === ÐÐÐÐÐÐ ÐÐÐÐÐ¢ÐÐ¯ ÐÐÐÐÐÐ¨Ð ===
+UserInputService.InputBegan:Connect(function(input, isProcessed)
+    if isProcessed then return end
+    if input.KeyCode == WallSettings.SelectedKey then
+        fire_wall_combo()
+    end
+end)
+
+CharacterTab:Section({ Title = "More Character Functions" })
+
+MainTab:Section({ Title = "destruction" })
+
+_G.KillServerActive = false
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð»Ð°Ð³-Ð¼Ð°ÑÐ¸Ð½Ñ (Ð±ÐµÐ· Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ð¹ ÑÐ²Ð¾ÐµÐ³Ð¾ ÐºÐ¾Ð´Ð°)
+local function lag_machine_combo()
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local lp = game:GetService("Players").LocalPlayer
+    
+    local function getTarget()
+        local players = game:GetService("Players"):GetPlayers()
+        local minDist = 50 
+        for _, p in pairs(players) do
+            if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local dist = (lp.Character.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                if dist < minDist then
+                    return p.Character
+                end
+            end
+        end
+        return nil
+    end
+
+    local char = lp.Character
+    local charData = lp:FindFirstChild("Data")
+    local charValue = charData and charData:FindFirstChild("Character") and charData.Character.Value
+    local target = getTarget()
+    
+    if char and charValue and target then
+        local wallComboAbility = ReplicatedStorage.Characters[charValue]:FindFirstChild("WallCombo")
+        if wallComboAbility then
+            for i = 1, 50 do
+                local actionNumber = "Action" .. math.random(1000, 9999)
+                local randomId = math.random(100000, 999999)
+                local randomOffset = Vector3.new(math.random(-5, 5), math.random(-5, 5), math.random(-5, 5))
+                local jitterCFrame = target.HumanoidRootPart.CFrame * CFrame.new(randomOffset)
+                
+                local remoteArgs = {
+                    wallComboAbility,
+                    "Characters:" .. charValue .. ":WallCombo",
+                    1, 
+                    randomId,
+                    {
+                        HitboxCFrames = {jitterCFrame},
+                        BestHitCharacter = target,
+                        HitCharacters = {target},
+                        Ignore = {[actionNumber] = {target}},
+                        DeathInfo = {},
+                        Actions = {[actionNumber] = {}},
+                        HitInfo = { Blocked = false, IsFacing = true, IsInFront = true },
+                        BlockedCharacters = {},
+                        ServerTime = tick(),
+                        FromCFrame = char.HumanoidRootPart.CFrame
+                    },
+                    actionNumber
+                }
+                
+                pcall(function() 
+                    ReplicatedStorage.Remotes.Abilities.Ability:FireServer(wallComboAbility, randomId)
+                    ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
+                end)
+            end
+
+            task.spawn(function()
+                if char:FindFirstChild("Action") then char.Action:Destroy() end
+                if char:FindFirstChild("Busy") then char.Busy:Destroy() end
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    for _, anim in pairs(hum:GetPlayingAnimationTracks()) do
+                        if anim.Name:find("WallCombo") then anim:Stop() end
+                    end
+                end
+            end)
+        end
+    end
+end
+
+-- ÐÐ¾Ð±Ð°Ð²Ð»ÑÐµÐ¼ Toggle Ð² WindUI
+MainTab:Toggle({
+    Title = "Lag Server (V1)",
+    Value = false,
+    Callback = function(state)
+        _G.KillServerActive = state
+        
+        if state then
+            print("")
+            task.spawn(function()
+                while _G.KillServerActive do
+                    lag_machine_combo()
+                    task.wait() -- ÐÐ°ÐºÑÐ¸Ð¼Ð°Ð»ÑÐ½Ð°Ñ ÑÐºÐ¾ÑÐ¾ÑÑÑ
+                end
+            end)
+        else
+            print("")
+        end
+    end
+})
+
+-- ÐÐ¾ÐºÐ°Ð»ÑÐ½ÑÐµ Ð¿ÐµÑÐµÐ¼ÐµÐ½Ð½ÑÐµ Ð´Ð»Ñ ÑÐ°Ð±Ð¾ÑÑ ÑÐºÑÐ¸Ð¿ÑÐ°
+local godModesActive = false
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿Ð¾Ð¸ÑÐºÐ° NPC "The Ultimate Bum"
+local function findUltimateBum()
+    local characters = workspace:FindFirstChild("Characters")
+    if not characters then return nil end
+    local npcs = characters:FindFirstChild("NPCs")
+    if not npcs then return nil end
+    local ultimateBum = npcs:FindFirstChild("The Ultimate Bum")
+    if ultimateBum and ultimateBum:IsA("Model") then return ultimateBum end
+    return nil
+end
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð²ÑÐ¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ ÑÐ´Ð°ÑÐ° (God Mode logic) 
+local function wallcomboveryez()
+    local playerChar = game.Players.LocalPlayer.Character
+    if not playerChar then return false end
+    
+    local charData = game.Players.LocalPlayer:FindFirstChild("Data")
+    local charValue = charData and charData:FindFirstChild("Character") and charData.Character.Value
+    if not charValue then return false end
+    
+    local charsFolder = game.ReplicatedStorage:FindFirstChild("Characters")
+    if not charsFolder or not charsFolder:FindFirstChild(charValue) then return false end
+    
+    local wallComboAbility = charsFolder[charValue]:FindFirstChild("WallCombo")
+    if not wallComboAbility then return false end
+    
+    local ultimateBum = findUltimateBum()
+    if not ultimateBum then return false end
+    
+    local actionNumber = "Action" .. math.random(1000, 9999)
+    local randomId = math.random(100000, 999999)
+    
+    local remoteArgs = {
+        wallComboAbility,
+        "Characters:" .. charValue .. ":WallCombo",
+        1,
+        randomId,
+        {
+            HitboxCFrames = {nil},
+            BestHitCharacter = ultimateBum,
+            HitCharacters = {ultimateBum},
+            Ignore = {[actionNumber] = {ultimateBum}},
+            DeathInfo = {},
+            Actions = {[actionNumber] = {}},
+            HitInfo = { Blocked = false, IsFacing = true, IsInFront = true },
+            BlockedCharacters = {},
+            ServerTime = tick(),
+            FromCFrame = nil
+        },
+        actionNumber
+    }
+    
+    pcall(function() 
+        game.ReplicatedStorage.Remotes.Abilities.Ability:FireServer(wallComboAbility, randomId)
+        game.ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
+    end)
+end
+
+-- Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¸Ðµ Toggle Ð² ÑÐ²Ð¾ÐµÐ¼ Wind UI
+MainTab:Toggle({
+    Title = "Lag Server (V2)",
+    Name = "Lag Server",
+    Default = false,
+    Callback = function(v)
+        godModesActive = v
+        if godModesActive then
+            -- ÐÐ°Ð¿ÑÑÐº ÑÐ¸ÐºÐ»Ð° Ð² Ð¾ÑÐ´ÐµÐ»ÑÐ½Ð¾Ð¼ Ð¿Ð¾ÑÐ¾ÐºÐµ
+            task.spawn(function()
+                while godModesActive do
+                    pcall(wallcomboveryez)
+                    task.wait(-2) -- Ð§Ð°ÑÑÐ¾ÑÐ° Ð¾Ð±Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ñ (Ð¼Ð¾Ð¶Ð½Ð¾ Ð¿Ð¾Ð´Ð¿ÑÐ°Ð²Ð¸ÑÑ)
+                end
+            end)
+        end
+    end
+})
+
+local godModesActive = false
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¿Ð¾Ð¸ÑÐºÐ° NPC "The Ultimate Bum"
+local function findUltimateBum()
+    local characters = workspace:FindFirstChild("Characters")
+    if not characters then return nil end
+    local npcs = characters:FindFirstChild("NPCs")
+    if not npcs then return nil end
+    local ultimateBum = npcs:FindFirstChild("The Ultimate Bum")
+    if ultimateBum and ultimateBum:IsA("Model") then return ultimateBum end
+    return nil
+end
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð²ÑÐ¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ñ ÑÐ´Ð°ÑÐ° (God Mode logic) 
+local function wallcomboveryez()
+    local playerChar = game.Players.LocalPlayer.Character
+    if not playerChar then return false end
+    
+    local charData = game.Players.LocalPlayer:FindFirstChild("Data")
+    local charValue = charData and charData:FindFirstChild("Character") and charData.Character.Value
+    if not charValue then return false end
+    
+    local charsFolder = game.ReplicatedStorage:FindFirstChild("Characters")
+    if not charsFolder or not charsFolder:FindFirstChild(charValue) then return false end
+    
+    local wallComboAbility = charsFolder[charValue]:FindFirstChild("WallCombo")
+    if not wallComboAbility then return false end
+    
+    local ultimateBum = findUltimateBum()
+    if not ultimateBum then return false end
+    
+    local actionNumber = "Action" .. math.random(1000, 9999)
+    local randomId = math.random(100000, 999999)
+    
+    local remoteArgs = {
+        wallComboAbility,
+        "Characters:" .. charValue .. ":WallCombo",
+        1,
+        randomId,
+        {
+            HitboxCFrames = {nil},
+            BestHitCharacter = ultimateBum,
+            HitCharacters = {ultimateBum},
+            Ignore = {[actionNumber] = {ultimateBum}},
+            DeathInfo = {},
+            Actions = {[actionNumber] = {}},
+            HitInfo = { Blocked = false, IsFacing = true, IsInFront = true },
+            BlockedCharacters = {},
+            ServerTime = tick(),
+            FromCFrame = nil
+        },
+        actionNumber
+    }
+    
+    pcall(function() 
+        game.ReplicatedStorage.Remotes.Abilities.Ability:FireServer(wallComboAbility, randomId)
+        game.ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
+    end)
+end
+
+-- Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¸Ðµ Toggle Ð² ÑÐ²Ð¾ÐµÐ¼ Wind UI
+CharacterTab:Toggle({
+    Title = "God Mode V1",
+    Name = "God Mode",
+    Default = false,
+    Callback = function(v)
+        godModesActive = v
+        if godModesActive then
+            -- ÐÐ°Ð¿ÑÑÐº ÑÐ¸ÐºÐ»Ð° Ð² Ð¾ÑÐ´ÐµÐ»ÑÐ½Ð¾Ð¼ Ð¿Ð¾ÑÐ¾ÐºÐµ
+            task.spawn(function()
+                while godModesActive do
+                    pcall(wallcomboveryez)
+                    task.wait(0.4) -- Ð§Ð°ÑÑÐ¾ÑÐ° Ð¾Ð±Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ñ (Ð¼Ð¾Ð¶Ð½Ð¾ Ð¿Ð¾Ð´Ð¿ÑÐ°Ð²Ð¸ÑÑ)
+                end
+            end)
+        end
+    end
+})
+
+-- ÐÐµÑÐµÐ¼ÐµÐ½Ð½Ð°Ñ Ð´Ð»Ñ ÐºÐ¾Ð½ÑÑÐ¾Ð»Ñ ÑÐ¾ÑÑÐ¾ÑÐ½Ð¸Ñ
+local godModeV2Active = false
+
+-- Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¸Ðµ Toggle Ð² Wind UI
+CharacterTab:Toggle({
+    Title = "God Mode V2",
+    Disc = "Use for: duels, WallCombo Spam and Kill Aura!",
+    Name = "God Mode V2",
+    Default = false,
+    Callback = function(v)
+        godModeV2Active = v
+        
+        if godModeV2Active then
+            -- ÐÐ°Ð¿ÑÑÐº ÑÐ¸ÐºÐ»Ð° Ð² Ð¾ÑÐ´ÐµÐ»ÑÐ½Ð¾Ð¼ Ð¿Ð¾ÑÐ¾ÐºÐµ
+            task.spawn(function()
+                print("God Mode On")
+                
+                while godModeV2Active do
+                    local playerChar = game.Players.LocalPlayer.Character
+                    local charData = game.Players.LocalPlayer:FindFirstChild("Data")
+                    local charValue = charData and charData:FindFirstChild("Character") and charData.Character.Value
+                    
+                    -- ÐÑÐ¾Ð²ÐµÑÑÐµÐ¼ Ð½Ð°Ð»Ð¸ÑÐ¸Ðµ Ð¿ÐµÑÑÐ¾Ð½Ð°Ð¶Ð° Ð¸ Ð´Ð°Ð½Ð½ÑÑ
+                    if playerChar and charValue and playerChar:FindFirstChild("HumanoidRootPart") then
+                        local charsFolder = game.ReplicatedStorage:FindFirstChild("Characters")
+                        local wallComboAbility = charsFolder and charsFolder[charValue] and charsFolder[charValue]:FindFirstChild("WallCombo")
+                        
+                        if wallComboAbility then
+                            -- Ð¦ÐµÐ»Ñ â ÑÐ°Ð¼ Ð¸Ð³ÑÐ¾Ðº
+                            local target = playerChar
+                            local actionNumber = "Action" .. math.random(1000, 9999)
+                            local randomId = math.random(100000, 999999)
+                            
+                            -- ÐÑÐ³ÑÐ¼ÐµÐ½ÑÑ Ð¸Ð· ÑÐ²Ð¾ÐµÐ³Ð¾ ÑÐºÑÐ¸Ð¿ÑÐ°
+                            local remoteArgs = {
+                                wallComboAbility,
+                                "Characters:" .. charValue .. ":WallCombo",
+                                1,
+                                randomId,
+                                {
+                                    HitboxCFrames = {nil},
+                                    BestHitCharacter = target,
+                                    HitCharacters = {target},
+                                    Ignore = {[actionNumber] = {target}},
+                                    DeathInfo = {},
+                                    Actions = {[actionNumber] = {}},
+                                    HitInfo = { 
+                                        Blocked = false, 
+                                        IsFacing = true, 
+                                        IsInFront = true 
+                                    },
+                                    BlockedCharacters = {},
+                                    ServerTime = tick(),
+                                    FromCFrame = nil
+                                },
+                                actionNumber
+                            }
+                            
+                            -- ÐÑÐ¿ÑÐ°Ð²ÐºÐ° Ð¿Ð°ÐºÐµÑÐ¾Ð²
+                            pcall(function() 
+                                game.ReplicatedStorage.Remotes.Abilities.Ability:FireServer(wallComboAbility, randomId)
+                                game.ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
+                            end)
+                        end
+                    end
+                    
+                    -- ÐÐ°Ð´ÐµÑÐ¶ÐºÐ° (Ð²Ð¼ÐµÑÑÐ¾ -5 Ð¿Ð¾ÑÑÐ°Ð²Ð¸Ð» 0.1 Ð´Ð»Ñ ÑÑÐ°Ð±Ð¸Ð»ÑÐ½Ð¾Ð³Ð¾ ÑÐ¿Ð°Ð¼Ð° Ð±ÐµÐ· Ð²ÑÐ»ÐµÑÐ¾Ð²)
+                    task.wait(0.1) 
+                end
+                print("God Mode V2 Off")
+            end)
+        end
+    end
+})
+
+
+
+
+
+CharacterTab:Section({Title = ""})
+
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+-- === ÐÐÐÐÐÐÐ¬ÐÐ«Ð ÐÐÐ ÐÐÐÐÐÐ«Ð ===
+getgenv().InstantRespawnEnabled = false
+local savedPosition = nil
+local hasTriggered = false
+local teleportDelay = 0 -- ÐÐ°Ð´ÐµÑÐ¶ÐºÐ° Ð¿ÐµÑÐµÐ´ Ð²Ð¾Ð·Ð²ÑÐ°ÑÐ¾Ð¼
+
+-- === Ð¤Ð£ÐÐÐ¦ÐÐ¯ Ð¡ÐÐ ÐÐ¡Ð ===
+local function instantReset()
+    local character = LocalPlayer.Character
+    if not character then return end
+    
+    if type(replicatesignal) == "function" then
+        replicatesignal(LocalPlayer.Kill)
+    else
+        character:BreakJoints()
+    end
+end
+
+-- === Ð¦ÐÐÐ ÐÐ ÐÐÐÐ ÐÐ Ð¡ÐÐÐ Ð¢Ð ===
+RunService.Heartbeat:Connect(function()
+    if not getgenv().InstantRespawnEnabled then return end
+    
+    local char = LocalPlayer.Character
+    if char then
+        local humanoid = char:FindFirstChild("Humanoid")
+        local rootPart = char:FindFirstChild("HumanoidRootPart")
+        
+        if humanoid and rootPart then
+            local healthStr = tostring(math.floor(humanoid.Health))
+            
+            -- ÐÑÐ¾Ð²ÐµÑÐºÐ° Ð½Ð° ÑÐ¼ÐµÑÑÑ (Ð¥Ð Ð½Ð° 0)
+            if string.sub(healthStr, 1, 1) == "0" and not hasTriggered then
+                hasTriggered = true
+                
+                -- ÐÐ¾Ð³Ð¸ÐºÐ° Ð·Ð°ÑÐ²Ð°ÑÐ° (Grabbed)
+                if char:GetAttribute("Grabbed") then
+                    task.spawn(function()
+                        while char and char:GetAttribute("Grabbed") do task.wait(0.1) end
+                        local currentRootPart = char:FindFirstChild("HumanoidRootPart")
+                        if currentRootPart then
+                            savedPosition = currentRootPart.CFrame
+                            instantReset()
+                        end
+                    end)
+                else
+                    savedPosition = rootPart.CFrame
+                    instantReset()
+                end
+            elseif string.sub(healthStr, 1, 1) ~= "0" then
+                hasTriggered = false
+            end
+        end
+    end
+end)
+
+-- === ÐÐÐÐÐ ÐÐ¢ ÐÐ ÐÐÐÐÐ¦ÐÐ® ÐÐÐ¡ÐÐ Ð ÐÐ¡ÐÐÐÐÐ ===
+LocalPlayer.CharacterAdded:Connect(function(char)
+    if not getgenv().InstantRespawnEnabled or not savedPosition then return end
+    
+    local rootPart = char:WaitForChild("HumanoidRootPart", 5)
+    if rootPart then
+        task.wait(teleportDelay)
+        
+        -- ÐÑÐ¿Ð¾Ð»ÑÐ·ÑÐµÐ¼ Ð¾ÑÐ¸Ð³Ð¸Ð½Ð°Ð»ÑÐ½ÑÐ¹ Override Ð¸Ð· Ð¸Ð³ÑÑ
+        local replication = LocalPlayer.PlayerScripts.Character:FindFirstChild("FullCustomReplication")
+        if replication then
+            pcall(function()
+                require(replication).Override(char, savedPosition)
+            end)
+        else
+            -- ÐÐ°Ð¿Ð°ÑÐ½Ð¾Ð¹ Ð²Ð°ÑÐ¸Ð°Ð½Ñ, ÐµÑÐ»Ð¸ ÑÐµÐ¿Ð»Ð¸ÐºÐ°ÑÐ¸Ñ Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÐ½Ð°
+            rootPart.CFrame = savedPosition
+        end
+        savedPosition = nil
+    end
+end)
+
+-- === ÐÐÐÐÐÐÐÐÐÐ Ð WIND UI ===
+CharacterTab:Toggle({
+    Title = "Instant Respawn",
+    Default = false,
+    Callback = function(state)
+        getgenv().InstantRespawnEnabled = state
+        if not state then
+            savedPosition = nil
+            hasTriggered = false
+        end
+    end
+})
+
+
+
+-- 1. Ð¡ÐÐÐ§ÐÐÐ Ð¡ÐÐÐÐÐÐ Ð¢Ð£ÐÐÐ (Ð§ÑÐ¾Ð±Ñ Ð¾Ð½ ÑÐ¾ÑÐ½Ð¾ Ð¿Ð¾ÑÐ²Ð¸Ð»ÑÑ Ð² Ð¼ÐµÐ½Ñ)
+local SmartHitboxToggle = CharacterTab:Toggle({
+    Title = "Anti Counter",
+    Value = false,
+    Callback = function(state)
+        getgenv().HitboxEnabled = state
+        print("Hitbox Enabled:", state)
+    end
+})
+
+-- 2. ÐÐ¡Ð® ÐÐÐÐÐÐ£ ÐÐ Ð¯Ð§ÐÐ Ð ÐÐ¢ÐÐÐÐ¬ÐÐ«Ð ÐÐÐ¢ÐÐ (Ð§ÑÐ¾Ð±Ñ Ð¾ÑÐ¸Ð±ÐºÐ¸ Ð½Ðµ Ð»Ð¾Ð¼Ð°Ð»Ð¸ UI)
+task.spawn(function()
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+
+    -- ÐÐ°ÑÑÑÐ¾Ð¹ÐºÐ¸
+    getgenv().HitboxMethod = "Override"
+    getgenv().Size1 = 15
+    getgenv().Size2 = 15
+    getgenv().Size3 = 15
+
+    -- ÐÐµÐ·Ð¾Ð¿Ð°ÑÐ½Ð¾Ðµ Ð¿Ð¾Ð´ÐºÐ»ÑÑÐµÐ½Ð¸Ðµ Core (Ð¶Ð´ÐµÐ¼ Ð¼Ð°ÐºÑÐ¸Ð¼ÑÐ¼ 5 ÑÐµÐºÑÐ½Ð´)
+    local success, core = pcall(function() 
+        return require(ReplicatedStorage:WaitForChild("Core", 5)) 
+    end)
+
+    if not success or not core then 
+        warn("")
+        return 
+    end
+
+    -- ÐÐ½ÑÐ¸-ÐÐ°ÑÐ½ÑÐµÑ Ð»Ð¾Ð³Ð¸ÐºÐ°
+    local CounteringPlayers = {}
+    local CounterAnims = {
+        ["rbxassetid://15853335966"] = true,
+        ["rbxassetid://17561546657"] = true,
+        ["rbxassetid://16024103130"] = true,
+    }
+
+    local function Monitor(char, player)
+        local hum = char:WaitForChild("Humanoid", 5)
+        if hum then
+            hum.AnimationPlayed:Connect(function(track)
+                if CounterAnims[track.Animation.AnimationId] then
+                    CounteringPlayers[player.Name] = true
+                    track.Stopped:Connect(function() CounteringPlayers[player.Name] = nil end)
+                end
+            end)
+        end
+    end
+
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character then Monitor(v.Character, v) end
+        v.CharacterAdded:Connect(function(c) Monitor(c, v) end)
+    end
+    Players.PlayerAdded:Connect(function(v) v.CharacterAdded:Connect(function(c) Monitor(c, v) end) end)
+
+    -- Ð¥ÑÐº ÑÐ¸ÑÐ±Ð¾ÐºÑÐ°
+    local combat = core.Get("Combat", "Hit")
+    local originalHitBox = combat.Box
+
+    combat.Box = function(...)
+        if not getgenv().HitboxEnabled then return originalHitBox(...) end
+        
+        local args = {...}
+        local targetChar = originalHitBox(...)
+        
+        if targetChar then
+            local p = Players:GetPlayerFromCharacter(targetChar)
+            if p and CounteringPlayers[p.Name] then return nil end
+        end
+
+        if args[3] and type(args[3]) == "table" then
+            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                -- ÐÐ¸ÑÑÐ°Ð½ÑÐ¸Ð¾Ð½Ð½Ð°Ñ Ð¿ÑÐ¾Ð²ÐµÑÐºÐ° ÐºÐ°ÑÐ½ÑÐµÑÐ°
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                        if (root.Position - p.Character.HumanoidRootPart.Position).Magnitude <= getgenv().Size3 then
+                            if CounteringPlayers[p.Name] then return nil end
+                        end
+                    end
+                end
+                -- ÐÑÐ¸Ð¼ÐµÐ½ÐµÐ½Ð¸Ðµ ÑÐ°Ð·Ð¼ÐµÑÐ¾Ð²
+                args[3].Size = Vector3.new(getgenv().Size1, getgenv().Size2, getgenv().Size3)
+                args[3].CFrame = root.CFrame * CFrame.new(0, 0, -(args[3].Size.Z / 2 - 4))
+            end
+        end
+        return originalHitBox(unpack(args))
+    end
+end)
+
+VisualTab:Section({ Title = "Map" })
+
+getgenv().WallEffectsBackup = getgenv().WallEffectsBackup or {}
+
+
+-- === Ð¢Ð£ÐÐÐ Ð¡ ÐÐÐÐÐ ÐÐ¢ÐÐ ===
+VisualTab:Toggle({
+    Title = "Anti Lag WallCombo",
+    Value = false,
+    Callback = function(state)
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Workspace = game:GetService("Workspace")
+        
+        -- ÐÐ°Ð¿ÐºÐ° Ð´Ð»Ñ ÑÑÐ°Ð½ÐµÐ½Ð¸Ñ
+        local storage = Workspace:FindFirstChild("AntiLagWall")
+        if not storage and state then
+            storage = Instance.new("Folder", Workspace)
+            storage.Name = "AntiLagWall"
+        end
+
+        local characters = ReplicatedStorage:FindFirstChild("Characters")
+        if not characters then return end
+
+        if state then
+            -- ÐÐÐÐ®Ð§ÐÐÐ: Ð£Ð±Ð¸ÑÐ°ÐµÐ¼ ÑÑÑÐµÐºÑÑ
+            print("Anti Lag Wall Active!")
+            for _, item in pairs(characters:GetDescendants()) do
+                if item.Name == "WallCombo" then
+                    for _, obj in pairs(item:GetDescendants()) do
+                        if obj:IsA("ParticleEmitter") or obj:IsA("Beam") then
+                            -- ÐÐ°Ð¿Ð¾Ð¼Ð¸Ð½Ð°ÐµÐ¼, Ð³Ð´Ðµ Ð»ÐµÐ¶Ð°Ð», Ð¸ Ð¿ÐµÑÐµÐ½Ð¾ÑÐ¸Ð¼
+                            getgenv().WallEffectsBackup[obj] = obj.Parent
+                            obj.Parent = storage
+                        elseif obj:IsA("Trail") then
+                            -- ÐÑÐ¾ÑÑÐ¾ Ð²ÑÐºÐ»ÑÑÐ°ÐµÐ¼, ÑÑÐ¾Ð±Ñ Ð½Ðµ Ð±ÑÐ»Ð¾ Ð¾ÑÐ¸Ð±Ð¾Ðº
+                            obj.Enabled = false
+                        end
+                    end
+                end
+            end
+        else
+            -- ÐÐ«ÐÐÐ®Ð§ÐÐÐ: ÐÐ¾Ð·Ð²ÑÐ°ÑÐ°ÐµÐ¼ Ð²ÑÑ Ð½Ð°Ð·Ð°Ð´
+            print("Anti Lag Wall Has Off...")
+            -- ÐÐ¾Ð·Ð²ÑÐ°ÑÐ°ÐµÐ¼ Particle Ð¸ Beam
+            for effect, parent in pairs(getgenv().WallEffectsBackup) do
+                if effect and parent then
+                    effect.Parent = parent
+                end
+            end
+            
+            -- ÐÐºÐ»ÑÑÐ°ÐµÐ¼ Trail Ð¾Ð±ÑÐ°ÑÐ½Ð¾
+            for _, item in pairs(characters:GetDescendants()) do
+                if item.Name == "WallCombo" then
+                    for _, obj in pairs(item:GetDescendants()) do
+                        if obj:IsA("Trail") then
+                            obj.Enabled = true
+                        end
+                    end
+                end
+            end
+            
+            -- Ð§Ð¸ÑÑÐ¸Ð¼ ÑÐ°Ð±Ð»Ð¸ÑÑ Ð¿Ð¾ÑÐ»Ðµ Ð²Ð¾Ð·Ð²ÑÐ°ÑÐ°
+            table.clear(getgenv().WallEffectsBackup)
+        end
+    end
+})
+
+local WorldTab = Window:Tab({
+    Title = "Custom Game",
+    Icon = "geist:sun",
+    Color = Color3.fromHex("#4CAF50")
+})
+
+local lighting = game:GetService("Lighting")
+local lp = game:GetService("Players").LocalPlayer
+local tweenService = game:GetService("TweenService")
+local debris = game:GetService("Debris")
+
+-- === ÐÐÐ ÐÐÐÐÐÐ«Ð ===
+local trailColor = Color3.fromRGB(0, 255, 255)
+local trailEnabled = false
+local GHOST_COLOR = Color3.fromRGB(0, 170, 255) 
+local GHOST_ENABLED = false
+local AURA_COLOR = Color3.fromRGB(0, 170, 255)
+local AURA_ENABLED = false
+local AURA_ID = "rbxassetid://15583586686"
+
+-- Ð¡Ð¾ÑÑÐ°Ð½ÐµÐ½Ð¸Ðµ Ð±Ð°Ð·Ñ
+if not _G.OriginalSettings then
+    _G.OriginalSettings = {
+        Brightness = lighting.Brightness,
+        OutdoorAmbient = lighting.OutdoorAmbient,
+        ClockTime = lighting.ClockTime
+    }
+end
+
+-- === ÐÐÐÐÐÐ Ð­Ð¤Ð¤ÐÐÐ¢ÐÐ ===
+
+local function applyLighting(Mode)
+    _G.CycleActive = false
+    local base = _G.OriginalSettings
+    if Mode == "None" then
+        lighting.Brightness = base.Brightness
+        lighting.OutdoorAmbient = base.OutdoorAmbient
+        lighting.ClockTime = base.ClockTime
+    elseif Mode == "Sun" then
+        lighting.ClockTime = 11.5
+        lighting.Brightness = 2
+    elseif Mode == "Night" then
+        lighting.ClockTime = 0
+        lighting.Brightness = 10 
+        lighting.OutdoorAmbient = Color3.fromRGB(35, 35, 55)
+    elseif Mode == "Cycle" then
+        _G.CycleActive = true
+        task.spawn(function()
+            while _G.CycleActive do
+                lighting:SetMinutesAfterMidnight(lighting:GetMinutesAfterMidnight() + 0.1)
+                task.wait() 
+            end
+        end)
+    end
+end
+
+local function createTrail()
+    local char = lp.Character or lp.CharacterAdded:Wait()
+    local torso = char:WaitForChild("UpperTorso", 5) or char:WaitForChild("Torso", 5)
+    if not torso then return end
+    if torso:FindFirstChild("CyberTrail") then torso.CyberTrail:Destroy() end
+    
+    local attTop = Instance.new("Attachment", torso)
+    attTop.Name = "AttTop"
+    attTop.Position = Vector3.new(0, 1, 0.5)
+    local attBottom = Instance.new("Attachment", torso)
+    attBottom.Name = "AttBottom"
+    attBottom.Position = Vector3.new(0, -1, 0.5)
+
+    local trail = Instance.new("Trail")
+    trail.Name = "CyberTrail"
+    trail.Parent = torso
+    trail.Attachment0 = attTop
+    trail.Attachment1 = attBottom
+    trail.Texture = "rbxassetid://15542755565"
+    trail.Lifetime = 3
+    trail.Enabled = trailEnabled
+    trail.Color = ColorSequence.new(trailColor)
+    trail.Transparency = NumberSequence.new(0, 1)
+    trail.WidthScale = NumberSequence.new(1, 0)
+    trail.FaceCamera = true
+end
+
+local function applyAura()
+    local char = lp.Character
+    if not char then return end
+    local validParts = {["UpperTorso"]=true, ["LowerTorso"]=true, ["Torso"]=true, ["LeftUpperArm"]=true, ["RightUpperArm"]=true, ["LeftUpperLeg"]=true, ["RightUpperLeg"]=true}
+
+    for _, obj in pairs(char:GetChildren()) do
+        if obj:IsA("BasePart") and validParts[obj.Name] then
+            if obj:FindFirstChild("BodyAura") then obj.BodyAura:Destroy() end
+            if not AURA_ENABLED then continue end
+            local p = Instance.new("ParticleEmitter")
+            p.Name = "BodyAura"; p.Texture = AURA_ID; p.Brightness = 2; p.LightEmission = 0.8; p.ZOffset = 1.5
+            p.Color = ColorSequence.new(AURA_COLOR)
+            p.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.5, 0.7), NumberSequenceKeypoint.new(1, 1)})
+            p.Size = NumberSequence.new(2); p.LockedToPart = true; p.Lifetime = NumberRange.new(0.8); p.Rate = 10; p.Speed = NumberRange.new(0)
+            p.Parent = obj
+        end
+    end
+end
+
+task.spawn(function()
+    while task.wait(0.1) do
+        local char = lp.Character
+        if not GHOST_ENABLED or not char then continue end
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if root and root.Velocity.Magnitude > 15 then
+            local ghost = Instance.new("Model", workspace.CurrentCamera)
+            for _, obj in pairs(char:GetChildren()) do
+                if obj:IsA("BasePart") and obj.Name ~= "HumanoidRootPart" and not obj:FindFirstAncestorOfClass("Accessory") then
+                    local p = obj:Clone()
+                    for _, child in pairs(p:GetChildren()) do child:Destroy() end
+                    p.Parent = ghost; p.Anchored = true; p.CanCollide = false; p.Material = Enum.Material.SmoothPlastic
+                    p.Color = GHOST_COLOR; p.Transparency = 0.6
+                    tweenService:Create(p, TweenInfo.new(0.5), {Transparency = 1}):Play()
+                end
+            end
+            debris:AddItem(ghost, 0.5)
+        end
+    end
+end)
+
+--- === ÐÐÐ¢ÐÐ Ð¤ÐÐÐ¡ === ---
+
+WorldTab:Section({Title = "Graphics"})
+
+WorldTab:Dropdown({
+    Title = "Lighting Modes",
+    Values = {"None", "Sun", "Night", "Cycle"},
+    Value = "None",
+    Callback = function(v) applyLighting(v) end
+})
+
+WorldTab:Section({Title = "Player Effects"})
+
+-- Ð¢ÑÐµÐ¹Ð»
+WorldTab:Toggle({
+    Title = "Enable Trail",
+    Value = false,
+    Callback = function(v) trailEnabled = v; createTrail() end
+})
+WorldTab:Colorpicker({
+    Title = "Trail Color",
+    Default = Color3.fromRGB(0, 255, 255),
+    Callback = function(c) 
+        trailColor = c 
+        local char = lp.Character
+        local tr = char and char:FindFirstChild("UpperTorso") and char.UpperTorso:FindFirstChild("CyberTrail")
+        if tr then tr.Color = ColorSequence.new(c) end
+    end
+})
+
+-- Ð¤Ð°Ð½ÑÐ¾Ð¼Ñ
+WorldTab:Toggle({
+    Title = "Clones (Ghost)",
+    Value = false,
+    Callback = function(v) GHOST_ENABLED = v end
+})
+WorldTab:Colorpicker({
+    Title = "Ghost Clones Color",
+    Default = Color3.fromRGB(0, 170, 255),
+    Callback = function(c) GHOST_COLOR = c end
+})
+
+-- ÐÑÑÐ°
+WorldTab:Toggle({
+    Title = "Body Aura",
+    Value = false,
+    Callback = function(v) AURA_ENABLED = v; applyAura() end
+})
+WorldTab:Colorpicker({
+    Title = "Aura Color",
+    Default = Color3.fromRGB(0, 170, 255),
+    Callback = function(c) AURA_COLOR = c; applyAura() end
+})
+
+lp.CharacterAdded:Connect(function()
+    task.wait(1)
+    if trailEnabled then createTrail() end
+    if AURA_ENABLED then applyAura() end
+end)
+
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+
+-- ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ ÑÐ°Ð¹Ð»Ð° Ð´Ð»Ñ ÑÐ¾ÑÑÐ°Ð½ÐµÐ½Ð¸Ñ (Ð±ÑÐ´ÐµÑ Ð»ÐµÐ¶Ð°ÑÑ Ð² Ð¿Ð°Ð¿ÐºÐµ workspace Ð²Ð°ÑÐµÐ³Ð¾ ÑÐ¸Ð¿-ÑÐºÐ·ÐµÐºÑÑÐ¾ÑÐ°)
+local ConfigFileName = "WindUI_Config.json"
+
+-- ÐÐºÐ»Ð°Ð´ÐºÐ° Ð½Ð°ÑÑÑÐ¾ÐµÐº
+local SettingsTab = Window:Tab({
+    Title = "Settings",
+    Icon = "geist:settings-gear-fill" -- ÐÑÐ»Ð¸ Ð±Ð¸Ð±Ð»Ð¸Ð¾ÑÐµÐºÐ° Ð¿Ð¾Ð´Ð´ÐµÑÐ¶Ð¸Ð²Ð°ÐµÑ Ð¸ÐºÐ¾Ð½ÐºÐ¸
+})
+
+    SettingsTab:Keybind({
+        Flag = "KeybindTest",
+        Title = "Keybind",
+        Desc = "Keybind to open Hub",
+        Value = "H",
+        Callback = function(v)
+            Window:SetToggleKey(Enum.KeyCode[v])
+        end
+    })
+
+
+SettingsTab:Section({ Title = "Configurations" })
+
+-- === 2. Ð¡ÐÐ¡Ð¢ÐÐÐ Ð¡ÐÐ¥Ð ÐÐÐÐÐÐ (CONFIG SYSTEM) ===
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ ÑÐ¾ÑÑÐ°Ð½ÐµÐ½Ð¸Ñ
+local function SaveConfig()
+    local data = {
+        AuraEnabled = getgenv().AuraEnabled,
+        IgnoreFriends = getgenv().Configs and getgenv().Configs.IgnoreFriends or false,
+        MaxDistance = getgenv().Configs and getgenv().Configs.MaxDistance or 70
+        -- Ð¡ÑÐ´Ð° Ð¼Ð¾Ð¶Ð½Ð¾ Ð´Ð¾Ð¿Ð¸ÑÐ°ÑÑ Ð»ÑÐ±ÑÐµ Ð´ÑÑÐ³Ð¸Ðµ Ð¿ÐµÑÐµÐ¼ÐµÐ½Ð½ÑÐµ getgenv
+    }
+    
+    local success, err = pcall(function()
+        writefile(ConfigFileName, HttpService:JSONEncode(data))
+    end)
+    
+    if success then
+        print("Config Saved!")
+        -- ÐÐ¾Ð¶Ð½Ð¾ Ð´Ð¾Ð±Ð°Ð²Ð¸ÑÑ ÑÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ðµ Wind UI, ÐµÑÐ»Ð¸ Ð¾Ð½Ð¾ ÐµÑÑÑ:
+        -- Window:Notification({Title = "Success", Desc = "Config Saved!"})
+    else
+        warn("Save Error: " .. err)
+    end
+end
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð·Ð°Ð³ÑÑÐ·ÐºÐ¸
+local function LoadConfig()
+    if not isfile(ConfigFileName) then 
+        print("No config file found.")
+        return 
+    end
+    
+    local success, err = pcall(function()
+        local data = HttpService:JSONDecode(readfile(ConfigFileName))
+        
+        -- ÐÑÐ¸Ð¼ÐµÐ½ÑÐµÐ¼ Ð·Ð½Ð°ÑÐµÐ½Ð¸Ñ Ðº Ð¿ÐµÑÐµÐ¼ÐµÐ½Ð½ÑÐ¼
+        getgenv().AuraEnabled = data.AuraEnabled
+        if getgenv().Configs then
+            getgenv().Configs.IgnoreFriends = data.IgnoreFriends
+            getgenv().Configs.MaxDistance = data.MaxDistance
+        end
+        
+        -- ÐÐÐÐÐ: Ð§ÑÐ¾Ð±Ñ ÐºÐ½Ð¾Ð¿ÐºÐ¸ Ð² UI Ð¾Ð±Ð½Ð¾Ð²Ð¸Ð»Ð¸ÑÑ Ð²Ð¸Ð·ÑÐ°Ð»ÑÐ½Ð¾, 
+        -- Ð½ÑÐ¶Ð½Ð¾ Ð¸ÑÐ¿Ð¾Ð»ÑÐ·Ð¾Ð²Ð°ÑÑ :SetValue() Ð´Ð»Ñ ÐºÐ°Ð¶Ð´Ð¾Ð³Ð¾ ÑÐ»ÐµÐ¼ÐµÐ½ÑÐ°, ÐºÐ°Ðº Ð¼Ñ Ð´ÐµÐ»Ð°Ð»Ð¸ ÑÐ°Ð½ÐµÐµ.
+    end)
+    
+    if success then
+        print("Config Loaded!")
+    else
+        warn("Load Error: " .. err)
+    end
+end
+
+-- ÐÐ½Ð¾Ð¿ÐºÐ¸ Ð² Ð¸Ð½ÑÐµÑÑÐµÐ¹ÑÐµ
+SettingsTab:Button({
+    Title = "Save Config",
+    Callback = function()
+        SaveConfig()
+    end
+})
+
+SettingsTab:Button({
+    Title = "Load Config",
+    Callback = function()
+        LoadConfig()
+    end
+})
+
+SettingsTab:Button({
+    Title = "Delete Config",
+    Callback = function()
+        if isfile(ConfigFileName) then
+            delfile(ConfigFileName)
+            print("Config Deleted.")
+        end
+    end
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+local Core = require(ReplicatedStorage:WaitForChild("Core", 9e9))
+local emotesFolder = ReplicatedStorage:WaitForChild("Cosmetics"):WaitForChild("KillEmote")
+
+-- === ÐÐÐ¡Ð¢Ð ÐÐÐÐ ===
+local Config = {
+    Enabled = false,
+    Mode = "Random", -- ÐÐµÑÐµÐ¸Ð¼ÐµÐ½Ð¾Ð²Ð°Ð½Ð¾ Ð¸Ð· Spam Ð² Random
+    SelectedEmote = "",
+    OneShotEmote = "",
+    IgnoreFriends = false,
+    Speed = 0.01,
+    Radius = 15,
+    CustomKey = "T", -- ÐÐ¸Ð½Ð´ Ð´Ð»Ñ Ð°Ð²ÑÐ¾-ÑÐ¿Ð°Ð¼Ð°
+    OneShotKey = "G" -- ÐÐ¸Ð½Ð´ Ð´Ð»Ñ ÑÐµÐºÑÐ¸Ð¸ Ones
+}
+
+-- Ð¤ÑÐ½ÐºÑÐ¸Ñ Ð¾Ð±ÑÐ¾Ð´Ð° Identity
+local function run_as_identity_2(fn)
+    local set_id = (syn and syn.set_thread_identity) or setthreadidentity
+    local get_id = (syn and syn.get_thread_identity) or getthreadidentity
+    local prev = get_id and get_id() or 2
+    if set_id then pcall(set_id, 2) end
+    local ok, res = pcall(fn)
+    if set_id then pcall(set_id, prev) end
+    return ok and res or nil
+end
+
+local function getEmoteNames()
+    local names = {}
+    local children = emotesFolder:GetChildren()
+    for i = 1, #children do table.insert(names, tostring(children[i].Name)) end
+    if #names == 0 then table.insert(names, "No Emotes") end
+    return names
+end
+
+local emoteList = getEmoteNames()
+Config.SelectedEmote = emoteList[1]
+Config.OneShotEmote = emoteList[1]
+
+-- === ÐÐÐÐÐÐ Ð¢ÐÐ ÐÐÐ¢Ð ===
+local function getTarget()
+    local char = LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
+    local target, dist = nil, Config.Radius
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj ~= char then
+            local hum = obj:FindFirstChildOfClass("Humanoid")
+            local hrp = obj:FindFirstChild("HumanoidRootPart")
+            if hum and hum.Health > 0 and hrp then
+                if Config.IgnoreFriends then
+                    local p = Players:GetPlayerFromCharacter(obj)
+                    if p and LocalPlayer:IsFriendsWith(p.UserId) then continue end
+                end
+                local d = (char.HumanoidRootPart.Position - hrp.Position).Magnitude
+                if d < dist then dist = d; target = obj end
+            end
+        end
+    end
+    return target
+end
+
+local function fireOneShot()
+    local target = getTarget()
+    local emoteObj = emotesFolder:FindFirstChild(Config.OneShotEmote)
+    if target and emoteObj then
+        _G.KillEmote = true
+        run_as_identity_2(function()
+            pcall(Core.Get("Combat", "Ability").Activate, emoteObj, target)
+        end)
+        _G.KillEmote = false
+    end
+end
+
+-- === ÐÐÐ¢ÐÐ Ð¤ÐÐÐ¡ ===
+
+-- 1. Ð¡ÐÐÐ¦ÐÐ¯ SPAM
+EmotesTab:Section({ Title = "Spam" })
+
+local SpamToggle;
+SpamToggle = EmotesTab:Toggle({
+    Title = "Kill Emotes Spam",
+    Default = false,
+    Callback = function(state) 
+        Config.Enabled = state 
+    end
+})
+
+EmotesTab:Dropdown({
+    Title = "Spam Mode",
+    Values = {"Selected"}, -- ÐÑÐ»Ð¾ "Spam", ÑÑÐ°Ð»Ð¾ "Random"
+    Value = "Selected",
+    Callback = function(val) Config.Mode = val end
+})
+
+local EmoteListDrop = EmotesTab:Dropdown({
+    Title = "Select Spam Emote",
+    Values = emoteList,
+    Value = Config.SelectedEmote,
+    Callback = function(val) Config.SelectedEmote = val end
+})
+
+EmotesTab:Button({
+    Title = "Refresh Emotes",
+    Callback = function()
+        local updated = getEmoteNames()
+        if EmoteListDrop and EmoteListDrop.SetValues then EmoteListDrop:SetValues(updated) end
+    end
+})
+
+EmotesTab:Toggle({
+    Title = "Ignore Friends",
+    Callback = function(state) Config.IgnoreFriends = state end
+})
+
+EmotesTab:Slider({
+    Title = "Speed Spam",
+    Step = 0.01,
+    Value = {Min = 0.01, Max = 5, Default = 0.01},
+    Callback = function(val) Config.Speed = val end
+})
+
+EmotesTab:Dropdown({
+    Title = "Spam Keybind",
+    Values = {"None", "T", "E", "R", "F", "G", "V", "Q", "One", "Two", "I", "Y"},
+    Default = "None",
+    Callback = function(val) Config.CustomKey = val end
+})
+
+-- 2. Ð¡ÐÐÐ¦ÐÐ¯ ONES
+EmotesTab:Section({ Title = "Ones" })
+
+EmotesTab:Button({
+    Title = "Activate One Emote",
+    Callback = function() fireOneShot() end
+})
+
+EmotesTab:Dropdown({
+    Title = "Select Emote",
+    Values = emoteList,
+    Value = Config.OneShotEmote,
+    Callback = function(val) Config.OneShotEmote = val end
+})
+
+-- ÐÐ¾Ð±Ð°Ð²Ð»ÐµÐ½Ñ T, E, Y, R
+EmotesTab:Dropdown({
+    Title = "Emote Keybind",
+    Values = {"None", "T", "E", "Y", "R", "V", "B", "N", "H", "U", "I", "One", "Two"},
+    Default = "None",
+    Callback = function(val) Config.OneShotKey = val end
+})
+
+-- === ÐÐÐÐÐÐ ÐÐÐÐÐ¢ÐÐ ===
+UserInputService.InputBegan:Connect(function(input, isProcessed)
+    if isProcessed then return end
+    
+    local pressedKey = input.KeyCode.Name
+    
+    -- ÐÐ¸Ð½Ð´ ÑÐ¿Ð°Ð¼Ð°
+    if pressedKey == Config.CustomKey then
+        if SpamToggle then
+            local newState = not Config.Enabled
+            pcall(function()
+                if SpamToggle.SetValue then SpamToggle:SetValue(newState)
+                elseif SpamToggle.Set then SpamToggle:Set(newState) end
+            end)
+        end
+    end
+    
+    -- ÐÐ¸Ð½Ð´ Ð½Ð° Ones
+    if pressedKey == Config.OneShotKey then
+        fireOneShot()
+    end
+end)
+
+-- ÐÑÐ½Ð¾Ð²Ð½Ð¾Ð¹ ÑÐ¸ÐºÐ»
+task.spawn(function()
+    while true do
+        if Config.Enabled then
+            local target = getTarget()
+            if target then
+                local all = emotesFolder:GetChildren()
+                -- ÐÑÐ¾Ð²ÐµÑÐºÐ° ÑÐµÐ¶Ð¸Ð¼Ð° Random
+                local emoteObj = (Config.Mode == "Random") and all[math.random(1, #all)] or emotesFolder:FindFirstChild(Config.SelectedEmote)
+                
+                if emoteObj and Config.Enabled then
+                    task.defer(function()
+                        _G.KillEmote = true
+                        run_as_identity_2(function()
+                            pcall(Core.Get("Combat", "Ability").Activate, emoteObj, target)
+                        end)
+                        _G.KillEmote = false
+                    end)
+                end
+            end
+        end
+        task.wait(Config.Speed)
+    end
+end)
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ActionRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Combat"):WaitForChild("Action")
+
+local EnhancerEnabled = false
+local EnhancerValue = 1
+
+    local OverviewSection1 = MainTab:Section({
+        Title = "More"
+    })
+
+MainTab:Toggle({
+    Title = "Multi Damage",
+    Value = false,
+    Callback = function(v)
+        EnhancerEnabled = v
+    end
+})
+
+MainTab:Slider({
+    Title = "Multiplier Amount",
+    Step = 1,
+    Width = 200,
+    Value = {
+        Min = 1,
+        Max = 50,
+        Default = 1,
+    },
+    Callback = function(v)
+        EnhancerValue = v
+    end
+})
+
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local args = {...}
+    local method = getnamecallmethod()
+
+    if self == ActionRemote and method == "FireServer" and EnhancerEnabled then
+        for _, arg in pairs(args) do
+            if type(arg) == "table" and arg.HitCharacters then
+                local targets = arg.HitCharacters
+                local newTargets = {}
+                for _, char in pairs(targets) do
+                    for i = 1, EnhancerValue do
+                        table.insert(newTargets, char)
+                    end
+                end
+                arg.HitCharacters = newTargets
+            end
+        end
+    end
+
+    return oldNamecall(self, unpack(args))
+end)
+
+local player = game.Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local selectedMaterial = "ForceField"
+local selectedColor = Color3.fromRGB(0, 255, 0)
+local rainbowEnabled = false
+local transformationActive = false -- Ð¤Ð»Ð°Ð³ Ð´Ð»Ñ ÐºÐ¾Ð½ÑÑÐ¾Ð»Ñ ÑÐ¸ÐºÐ»Ð°
+local rainbowConnection
+local originalData = {}
+
+WorldTab:Dropdown({
+    Title = "Select Material",
+    Values = {"ForceField (Cool)", "Neon", "Glass", "Plastic", "Wood", "Slate", "SmoothPlastic", "Glacier"},
+    Default = "ForceField (Cool)",
+    Callback = function(v)
+        selectedMaterial = (v == "ForceField (Cool)") and "ForceField" or v
+    end
+})
+
+WorldTab:Colorpicker({
+    Title = "Character Color",
+    Default = Color3.fromRGB(0, 255, 0),
+    Callback = function(color) 
+        selectedColor = color
+    end
+})
+
+WorldTab:Toggle({
+    Title = "Rainbow",
+    Value = false,
+    Callback = function(v)
+        rainbowEnabled = v
+        if v then
+            if rainbowConnection then rainbowConnection:Disconnect() end
+            rainbowConnection = RunService.RenderStepped:Connect(function()
+                if rainbowEnabled then
+                    selectedColor = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+                end
+            end)
+        else
+            if rainbowConnection then rainbowConnection:Disconnect() end
+        end
+    end
+})
+
+WorldTab:Toggle({
+    Title = "Apply Transformation",
+    Value = false,
+    Callback = function(v)
+        transformationActive = v -- Ð£ÑÑÐ°Ð½Ð°Ð²Ð»Ð¸Ð²Ð°ÐµÐ¼ ÑÑÐ°ÑÑÑ
+        local character = player.Character
+        if not character then return end
+
+        if v then
+            -- 1. ÐÑÑÑÐµÐ¼ Ð°ÐºÑÐµÑÑÑÐ°ÑÑ
+            for _, item in ipairs(character:GetChildren()) do
+                if item:IsA("Accessory") or item:IsA("Shirt") or item:IsA("Pants") or item:IsA("ShirtGraphic") then
+                    item.Parent = game:GetService("TestService")
+                end
+            end
+
+            -- 2. ÐÐ°Ð¿ÑÑÐºÐ°ÐµÐ¼ ÑÐ¸ÐºÐ»
+            task.spawn(function()
+                while transformationActive and player.Character == character do
+                    for _, part in ipairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                            if not originalData[part] then
+                                originalData[part] = {
+                                    Material = part.Material,
+                                    Color = part.Color,
+                                    Transparency = part.Transparency
+                                }
+                            end
+                            
+                            part.Material = Enum.Material[selectedMaterial]
+                            part.Color = selectedColor
+                            part.Transparency = 0
+                            
+                            if part.Name == "Head" then
+                                local face = part:FindFirstChildOfClass("Decal")
+                                if face then face.Transparency = 1 end
+                            end
+                        end
+                    end
+                    task.wait(0.05) -- Ð£Ð¼ÐµÐ½ÑÑÐ¸Ð» Ð·Ð°Ð´ÐµÑÐ¶ÐºÑ Ð´Ð»Ñ Ð¿Ð»Ð°Ð²Ð½Ð¾ÑÑÐ¸ ÑÐ°Ð´ÑÐ³Ð¸
+                end
+            end)
+        else
+            -- 3. ÐÐ«ÐÐÐ®Ð§ÐÐÐÐ (Ð¡Ð½Ð°ÑÐ°Ð»Ð° Ð³Ð°ÑÐ¸Ð¼ ÑÐ»Ð°Ð³, Ð¿Ð¾ÑÐ¾Ð¼ Ð²Ð¾Ð·Ð²ÑÐ°ÑÐ°ÐµÐ¼)
+            transformationActive = false 
+            task.wait(0.1) -- ÐÐ°ÐµÐ¼ ÑÐ¸ÐºÐ»Ñ Ð²ÑÐµÐ¼Ñ Ð·Ð°Ð²ÐµÑÑÐ¸ÑÑÑÑ, ÑÑÐ¾Ð±Ñ Ð¾Ð½ Ð½Ðµ Ð¿ÐµÑÐµÐ·Ð°Ð¿Ð¸ÑÐ°Ð» ÑÐ²ÐµÑÐ°
+
+            for part, data in pairs(originalData) do
+                if part and part.Parent then
+                    part.Material = data.Material
+                    part.Color = data.Color
+                    part.Transparency = data.Transparency
+                end
+            end
+            table.clear(originalData)
+
+            local head = character:FindFirstChild("Head")
+            if head then
+                local face = head:FindFirstChildOfClass("Decal")
+                if face then face.Transparency = 0 end
+            end
+
+            for _, item in ipairs(game:GetService("TestService"):GetChildren()) do
+                item.Parent = character
+            end
+        end
+    end
+})
+
+local assetID = "rbxassetid://3320590485" 
+local s = Instance.new("Sound", game:GetService("CoreGui")) 
+s.SoundId = assetID
+s.Volume = 6
+s.PlayOnRemove = false
+s:Play()
+s.Ended:Wait()
+s:Destroy()
