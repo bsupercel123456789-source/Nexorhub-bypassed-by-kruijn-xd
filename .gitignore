@@ -348,8 +348,8 @@ if data and data.guild then
 else
  -- ÐÑÐ»Ð¸ API Ð½ÐµÐ´Ð¾ÑÑÑÐ¿Ð½Ð¾ Ð¸Ð»Ð¸ ÐºÐ¾Ð´ Ð½ÐµÐ²ÐµÑÐ½ÑÐ¹
  HomeTab:Paragraph({
- Title = "NexorHub Discord",
- Desc = "." .. InviteCode,
+ Title = "Krujin Discord Name:",
+ Desc = "Krujin_0" .. InviteCode,
  Icon = "alert-circle"
  })
 end
